@@ -282,3 +282,33 @@ class AuthService:
         except Exception as e:
             logger.error(f"Erro ao atualizar perfil: {str(e)}")
             return {'success': False, 'error': 'Erro interno do servidor'}
+    
+    def change_password(self, user_id: str, current_password: str, new_password: str) -> Dict[str, Any]:
+        """Altera senha do usuário"""
+        try:
+            # Busca usuário
+            result = self.supabase.table('users').select('*').eq('id', user_id).execute()
+            
+            if not result.data:
+                return {'success': False, 'error': 'Usuário não encontrado'}
+            
+            user = result.data[0]
+            
+            # Verifica senha atual
+            if not verify_password(current_password, user['password_hash']):
+                return {'success': False, 'error': 'Senha atual incorreta'}
+            
+            # Gera nova senha
+            new_password_hash = hash_password(new_password)
+            
+            # Atualiza senha
+            self.supabase.table('users').update({
+                'password_hash': new_password_hash,
+                'updated_at': datetime.now().isoformat()
+            }).eq('id', user_id).execute()
+            
+            return {'success': True}
+            
+        except Exception as e:
+            logger.error(f"Erro ao alterar senha: {str(e)}")
+            return {'success': False, 'error': 'Erro interno do servidor'}
