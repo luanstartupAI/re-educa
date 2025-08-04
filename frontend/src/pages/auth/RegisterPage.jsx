@@ -9,7 +9,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { AuthLayout } from '../../components/layouts/PageLayout';
 import { useAuth } from '../../lib/api';
 import { Heart, Eye, EyeOff, User, Mail, Lock, Calendar, Phone, ArrowRight, CheckCircle } from 'lucide-react';
-import { toast } from 'sonner';
 import { validateCPF, validatePassword } from '../../lib/utils';
 
 // Schema de validação

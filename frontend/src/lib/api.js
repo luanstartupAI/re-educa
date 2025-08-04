@@ -199,6 +199,8 @@ export const apiService = {
   },
 };
 
+import React from 'react';
+
 // Hooks para React
 export const useApi = () => {
   const [loading, setLoading] = React.useState(false);

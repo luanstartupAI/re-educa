@@ -201,16 +201,18 @@ export const theme = {
       const currentTheme = theme.utils.getCurrentTheme();
       theme.utils.applyTheme(currentTheme);
       
-      // Listener para mudanças do sistema
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-        const stored = localStorage.getItem(theme.config.storageKey);
-        if (stored === 'system') {
-          theme.utils.applyTheme('system');
-        }
-      });
+          // Listener para mudanças do sistema
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+      const stored = localStorage.getItem(theme.config.storageKey);
+      if (stored === 'system') {
+        theme.utils.applyTheme('system');
+      }
+    });
     },
   },
 };
+
+import React from 'react';
 
 // Hook para React
 export const useTheme = () => {

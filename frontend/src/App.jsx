@@ -9,6 +9,11 @@ import { ContentLayout, DashboardLayout, AuthLayout } from './components/layouts
 // Pages
 import { LoginPage } from './pages/auth/LoginPage';
 import { RegisterPage } from './pages/auth/RegisterPage';
+import { IMCCalculatorPage } from './pages/tools/IMCCalculatorPage';
+import { FoodDiaryPage } from './pages/tools/FoodDiaryPage';
+import { StorePage } from './pages/store/StorePage';
+import { ProductDetailPage } from './pages/store/ProductDetailPage';
+import { DashboardPage } from './pages/dashboard/DashboardPage';
 
 // Components
 import { ErrorBoundary } from './components/ui/error';
@@ -245,18 +250,66 @@ function App() {
                 } 
               />
 
-              {/* Protected Routes */}
-              <Route 
-                path="/dashboard" 
-                element={
-                  <ProtectedRoute>
-                    <DashboardPage />
-                  </ProtectedRoute>
-                } 
-              />
+                          {/* Protected Routes */}
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              } 
+            />
 
-              {/* Catch all route */}
-              <Route path="*" element={<Navigate to="/" replace />} />
+            {/* Health Tools Routes */}
+            <Route 
+              path="/tools/imc" 
+              element={
+                <ProtectedRoute>
+                  <IMCCalculatorPage />
+                </ProtectedRoute>
+              } 
+            />
+
+            <Route 
+              path="/tools/food-diary" 
+              element={
+                <ProtectedRoute>
+                  <FoodDiaryPage />
+                </ProtectedRoute>
+              } 
+            />
+
+            {/* Store Routes */}
+            <Route 
+              path="/store" 
+              element={
+                <ProtectedRoute>
+                  <StorePage />
+                </ProtectedRoute>
+              } 
+            />
+
+            <Route 
+              path="/store/product/:productId" 
+              element={
+                <ProtectedRoute>
+                  <ProductDetailPage />
+                </ProtectedRoute>
+              } 
+            />
+
+            {/* Dashboard Routes */}
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              } 
+            />
+
+            {/* Catch all route */}
+            <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
 
             {/* Toast Notifications */}
