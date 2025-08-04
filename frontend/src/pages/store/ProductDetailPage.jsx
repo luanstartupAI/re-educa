@@ -76,7 +76,7 @@ export const ProductDetailPage = () => {
         })
       );
       toast.success('Produto adicionado ao carrinho!');
-    } catch (error) {
+    } catch {
       toast.error('Erro ao adicionar ao carrinho. Tente novamente.');
     }
   };
@@ -86,7 +86,7 @@ export const ProductDetailPage = () => {
       // Implementar toggle de wishlist
       setIsInWishlist(!isInWishlist);
       toast.success(isInWishlist ? 'Removido dos favoritos!' : 'Adicionado aos favoritos!');
-    } catch (error) {
+    } catch {
       toast.error('Erro ao atualizar favoritos. Tente novamente.');
     }
   };
@@ -121,7 +121,7 @@ export const ProductDetailPage = () => {
       setShowReviewForm(false);
       setReviewForm({ rating: 5, title: '', comment: '' });
       loadProductData(); // Recarregar reviews
-    } catch (error) {
+    } catch {
       toast.error('Erro ao enviar avaliação. Tente novamente.');
     }
   };

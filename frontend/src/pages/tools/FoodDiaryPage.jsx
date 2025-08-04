@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { DashboardLayout } from '../../components/layouts/PageLayout';
 import { useApi } from '../../lib/api';
 import { apiService } from '../../lib/api';
-import { formatDate, formatDateTime } from '../../lib/utils';
+import { formatDate } from '../../lib/utils';
 import { 
   Apple, 
   Search, 
@@ -78,8 +78,8 @@ export const FoodDiaryPage = () => {
       );
       setEntries(data.entries || []);
       calculateDailyTotals(data.entries || []);
-    } catch (error) {
-      console.error('Erro ao carregar entradas:', error);
+    } catch {
+      console.error('Erro ao carregar entradas:');
     }
   };
 
@@ -156,17 +156,17 @@ export const FoodDiaryPage = () => {
       setShowAddForm(false);
       reset();
       loadEntries();
-    } catch (error) {
+    } catch {
       toast.error('Erro ao adicionar alimento. Tente novamente.');
     }
   };
 
-  const deleteEntry = async (entryId) => {
+  const deleteEntry = async () => {
     try {
       // Implementar delete no backend
       toast.success('Entrada removida com sucesso!');
       loadEntries();
-    } catch (error) {
+    } catch {
       toast.error('Erro ao remover entrada. Tente novamente.');
     }
   };
@@ -182,9 +182,9 @@ export const FoodDiaryPage = () => {
     return mealTypes.find(meal => meal.value === type)?.icon || '🍽️';
   };
 
-  const getMealTypeLabel = (type) => {
-    return mealTypes.find(meal => meal.value === type)?.label || 'Refeição';
-  };
+  // const getMealTypeLabel = (type) => { // Unused function
+  //   return mealTypes.find(meal => meal.value === type)?.label || 'Refeição';
+  // };
 
   const getMacroColor = (macro) => {
     switch (macro) {

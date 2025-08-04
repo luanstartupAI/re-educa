@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import {
   BookOpen,
   TrendingUp,
@@ -63,8 +63,8 @@ const IntelligentBlog = () => {
   const [isGenerating, setIsGenerating] = useState(false);
 
   // Estados para funcionalidades avançadas
-  const [readingMode, setReadingMode] = useState(false);
-  const [audioEnabled, setAudioEnabled] = useState(false);
+  // const [readingMode, setReadingMode] = useState(false); // Unused variables
+  // const [audioEnabled, setAudioEnabled] = useState(false); // Unused variables
   const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
 
   useEffect(() => {

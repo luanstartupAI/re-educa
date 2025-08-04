@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import {
   Activity,
   Heart,
@@ -72,7 +72,7 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Dados simulados (em produção viriam da API)
-  const [dashboardData, setDashboardData] = useState({
+  const [dashboardData] = useState({
     stats: {
       totalUsers: 12847,
       activeUsers: 8934,
@@ -558,42 +558,50 @@ const HealthTab = ({ data }) => (
   </div>
 );
 
-const NutritionTab = ({ data }) => (
-  <div className="space-y-6">
-    <h2 className="text-xl font-semibold text-gray-900">Análise Nutricional</h2>
-    
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <MorphingCard className="p-6">
-        <h3 className="text-lg font-semibold mb-4">Distribuição de Macronutrientes</h3>
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <RechartsPieChart>
-              <Pie
-                data={data.charts.nutritionBreakdown}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={100}
-                paddingAngle={5}
-                dataKey="value"
-              >
-                {data.charts.nutritionBreakdown.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(value) => `${value}%`} />
-            </RechartsPieChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="flex justify-center gap-4 mt-4">
-          {data.charts.nutritionBreakdown.map((item, index) => (
-            <div key={index} className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
-              <span className="text-sm">{item.name}</span>
-            </div>
-          ))}
-        </div>
-      </MorphingCard>
+const NutritionTab = () => {
+  // Mock data for nutrition breakdown
+  const nutritionData = [
+    { name: 'Proteínas', value: 25, color: '#ff6b6b' },
+    { name: 'Carboidratos', value: 45, color: '#4ecdc4' },
+    { name: 'Gorduras', value: 30, color: '#45b7d1' }
+  ];
+
+  return (
+    <div className="space-y-6">
+      <h2 className="text-xl font-semibold text-gray-900">Análise Nutricional</h2>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <MorphingCard className="p-6">
+          <h3 className="text-lg font-semibold mb-4">Distribuição de Macronutrientes</h3>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <RechartsPieChart>
+                <Pie
+                  data={nutritionData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {nutritionData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => `${value}%`} />
+              </RechartsPieChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="flex justify-center gap-4 mt-4">
+            {nutritionData.map((item, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
+                <span className="text-sm">{item.name}</span>
+              </div>
+            ))}
+          </div>
+        </MorphingCard>
 
       <MorphingCard className="p-6">
         <h3 className="text-lg font-semibold mb-4">Metas Diárias</h3>
@@ -627,7 +635,7 @@ const NutritionTab = ({ data }) => (
   </div>
 );
 
-const FitnessTab = ({ data }) => (
+const FitnessTab = () => (
   <div className="space-y-6">
     <h2 className="text-xl font-semibold text-gray-900">Fitness & Exercícios</h2>
     

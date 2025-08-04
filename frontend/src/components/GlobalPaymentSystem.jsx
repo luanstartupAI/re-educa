@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import {
   CreditCard,
   Smartphone,
@@ -97,7 +97,7 @@ const GlobalPaymentSystem = () => {
   const [paymentMethod, setPaymentMethod] = useState('');
   const [currency, setCurrency] = useState('BRL');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentStatus, setPaymentStatus] = useState(null);
+  const [paymentStatus] = useState(null);
   const [userLocation, setUserLocation] = useState('BR');
   const [discountCode, setDiscountCode] = useState('');
   const [appliedDiscount, setAppliedDiscount] = useState(null);
@@ -105,7 +105,7 @@ const GlobalPaymentSystem = () => {
   // Estados para checkout avançado
   const [customerData, setCustomerData] = useState({});
   const [billingAddress, setBillingAddress] = useState({});
-  const [subscriptionPlan, setSubscriptionPlan] = useState(null);
+  // const [subscriptionPlan] = useState(null); // Unused variable
   const [pixQrCode, setPixQrCode] = useState('');
   const [installments, setInstallments] = useState(1);
 
@@ -266,7 +266,7 @@ const GlobalPaymentSystem = () => {
 // COMPONENTES DO SISTEMA
 // ================================
 
-const PaymentHeader = ({ currentStep, steps, currency, setCurrency, userLocation }) => (
+const PaymentHeader = ({ currentStep, steps, currency, setCurrency }) => (
   <StaggerContainer className="mb-12">
     <div className="text-center mb-8">
       <FloatingElement>
@@ -523,7 +523,7 @@ const PlanCard = ({ product, currency, isSelected, onSelect, appliedDiscount }) 
   );
 };
 
-const PaymentSidebar = ({ selectedProducts, currency, appliedDiscount, currentStep }) => {
+const PaymentSidebar = ({ selectedProducts, appliedDiscount }) => {
   const calculateTotal = () => {
     let total = selectedProducts.reduce((sum, product) => sum + product.price, 0);
     

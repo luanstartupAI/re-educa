@@ -73,7 +73,7 @@ export const IMCCalculatorPage = () => {
       const imc = calculateIMC(data.weight, data.height);
       const classification = classifyIMC(imc);
 
-      const result = await request(() => 
+      await request(() => 
         apiService.health.calculateIMC({
           weight: data.weight,
           height: data.height,
@@ -85,7 +85,7 @@ export const IMCCalculatorPage = () => {
       toast.success('IMC calculado e salvo com sucesso!');
       loadHistory(); // Recarregar histórico
       reset();
-    } catch (error) {
+    } catch {
       toast.error('Erro ao salvar IMC. Tente novamente.');
     }
   };

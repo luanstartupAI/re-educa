@@ -4,7 +4,7 @@ import { Button } from '../../components/ui/button';
 import { DashboardLayout } from '../../components/layouts/PageLayout';
 import { useApi } from '../../lib/api';
 import { apiService } from '../../lib/api';
-import { formatCurrency, formatDate, formatPercentage } from '../../lib/utils';
+import { formatCurrency } from '../../lib/utils';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -50,7 +50,7 @@ import {
 } from 'recharts';
 
 export const DashboardPage = () => {
-  const { request, loading } = useApi();
+  const { request } = useApi();
   const [dashboardData, setDashboardData] = React.useState({
     metrics: {},
     charts: {},
@@ -82,7 +82,7 @@ export const DashboardPage = () => {
     try {
       await loadDashboardData();
       toast.success('Dados atualizados com sucesso!');
-    } catch (error) {
+    } catch {
       toast.error('Erro ao atualizar dados.');
     } finally {
       setIsRefreshing(false);

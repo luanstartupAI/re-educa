@@ -158,7 +158,7 @@ const AIAssistantPopup = () => {
 
   // Gerar resposta da IA (simulada)
   const generateAIResponse = (message, agentType) => {
-    const agent = agents[agentType];
+    // const agent = agents[agentType]; // Unused variable
     const responses = {
       platform_concierge: {
         content: `Entendi que você quer "${message}". Vou te conectar com o especialista ideal! 🎯`,
@@ -238,21 +238,21 @@ const AIAssistantPopup = () => {
   const processPayment = async (product) => {
     try {
       // Simular criação de pagamento
-      const paymentData = {
-        amount: product.price,
-        currency: 'BRL',
-        description: product.name,
-        user_data: {
-          user_id: user.id,
-          email: 'joao@email.com',
-          first_name: 'João',
-          last_name: 'Silva'
-        },
-        metadata: {
-          product_id: product.id,
-          source: 'ai_chat'
-        }
-      };
+      // const paymentData = { // Unused variable
+      //   amount: product.price,
+      //   currency: 'BRL',
+      //   description: product.name,
+      //   user_data: {
+      //     user_id: user.id,
+      //     email: 'joao@email.com',
+      //     first_name: 'João',
+      //     last_name: 'Silva'
+      //   },
+      //   metadata: {
+      //     product_id: product.id,
+      //     source: 'ai_chat'
+      //   }
+      // };
 
       // Aqui você faria a chamada real para a API
       // const response = await fetch('/api/payments/create', { ... });

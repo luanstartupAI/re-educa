@@ -33,7 +33,7 @@ export const StorePage = () => {
   const [selectedCategory, setSelectedCategory] = React.useState('');
   const [viewMode, setViewMode] = React.useState('grid'); // 'grid' or 'list'
   const [sortBy, setSortBy] = React.useState('name');
-  const [priceRange, setPriceRange] = React.useState({ min: 0, max: 1000 });
+  // const [priceRange] = React.useState({ min: 0, max: 1000 }); // Unused variable
   const [showFilters, setShowFilters] = React.useState(false);
 
   // Carregar dados iniciais
@@ -52,8 +52,8 @@ export const StorePage = () => {
       setProducts(productsData.products || []);
       setCategories(categoriesData.categories || []);
       setFeaturedProducts(featuredData.products || []);
-    } catch (error) {
-      console.error('Erro ao carregar dados da loja:', error);
+    } catch {
+      console.error('Erro ao carregar dados da loja:');
       toast.error('Erro ao carregar produtos. Tente novamente.');
     }
   };
@@ -69,8 +69,8 @@ export const StorePage = () => {
         apiService.products.search({ query: searchQuery })
       );
       setProducts(data.products || []);
-    } catch (error) {
-      console.error('Erro na busca:', error);
+    } catch {
+      console.error('Erro na busca:');
       toast.error('Erro ao buscar produtos. Tente novamente.');
     }
   };
@@ -88,8 +88,8 @@ export const StorePage = () => {
         apiService.products.getByCategory(categoryId)
       );
       setProducts(data.products || []);
-    } catch (error) {
-      console.error('Erro ao filtrar por categoria:', error);
+    } catch {
+      console.error('Erro ao filtrar por categoria:');
       toast.error('Erro ao filtrar produtos. Tente novamente.');
     }
   };
@@ -119,16 +119,16 @@ export const StorePage = () => {
     try {
       await request(() => apiService.orders.addToCart({ product_id: productId, quantity: 1 }));
       toast.success('Produto adicionado ao carrinho!');
-    } catch (error) {
+    } catch {
       toast.error('Erro ao adicionar ao carrinho. Tente novamente.');
     }
   };
 
-  const toggleWishlist = async (productId) => {
+  const toggleWishlist = async () => {
     try {
       // Implementar toggle de wishlist
       toast.success('Produto adicionado aos favoritos!');
-    } catch (error) {
+    } catch {
       toast.error('Erro ao adicionar aos favoritos. Tente novamente.');
     }
   };
