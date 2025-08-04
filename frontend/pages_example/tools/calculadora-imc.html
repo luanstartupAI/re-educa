@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de IMC - RE-EDUCA | Viva Saudável</title>
+    <link rel="stylesheet" href="../src/styles/main.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .imc-calculator {
+            background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-white) 100%);
+            border-radius: var(--radius-2xl);
+            padding: 3rem;
+            box-shadow: var(--shadow-xl);
+            margin-bottom: 2rem;
+        }
+        
+        .imc-result {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            text-align: center;
+            margin-top: 2rem;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .imc-value {
+            font-size: 4rem;
+            font-weight: var(--font-weight-bold);
+            margin: 1rem 0;
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .imc-classification {
+            font-size: 1.5rem;
+            font-weight: var(--font-weight-semibold);
+            margin-bottom: 1rem;
+        }
+        
+        .imc-table {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            margin-top: 2rem;
+        }
+        
+        .imc-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .imc-table th,
+        .imc-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--color-gray-200);
+        }
+        
+        .imc-table th {
+            background: var(--color-gray-50);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-gray-900);
+        }
+        
+        .imc-table tr.highlight {
+            background: var(--color-primary-light);
+            font-weight: var(--font-weight-semibold);
+        }
+        
+        .weight-range {
+            background: var(--color-gray-50);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .weight-range-title {
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-gray-900);
+            margin-bottom: 0.5rem;
+        }
+        
+        .weight-range-values {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+        }
+        
+        .weight-range-item {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .weight-range-value {
+            font-size: 1.25rem;
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+        }
+        
+        .weight-range-label {
+            font-size: var(--font-size-sm);
+            color: var(--color-gray-600);
+            margin-top: 0.25rem;
+        }
+        
+        .tips-section {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            margin-top: 2rem;
+        }
+        
+        .tip-card {
+            background: var(--color-gray-50);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--color-primary);
+        }
+        
+        .tip-icon {
+            color: var(--color-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .tip-title {
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-gray-900);
+            margin-bottom: 0.5rem;
+        }
+        
+        .tip-description {
+            color: var(--color-gray-700);
+            line-height: var(--line-height-relaxed);
+        }
+        
+        .history-section {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            margin-top: 2rem;
+        }
+        
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--color-gray-200);
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        .history-date {
+            font-size: var(--font-size-sm);
+            color: var(--color-gray-600);
+        }
+        
+        .history-values {
+            text-align: right;
+        }
+        
+        .history-imc {
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-primary);
+        }
+        
+        .history-classification {
+            font-size: var(--font-size-sm);
+            color: var(--color-gray-600);
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            margin-top: 2rem;
+        }
+        
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .input-unit {
+            background: var(--color-gray-100);
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-weight-medium);
+            color: var(--color-gray-700);
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .gender-selector {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .gender-option {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid var(--color-gray-300);
+            border-radius: var(--radius-lg);
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            background: white;
+        }
+        
+        .gender-option:hover {
+            border-color: var(--color-primary);
+        }
+        
+        .gender-option.selected {
+            border-color: var(--color-primary);
+            background: var(--color-primary-light);
+        }
+        
+        .gender-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--color-primary);
+        }
+        
+        .age-input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navegação -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../index.html" class="navbar-brand">
+                <img src="../assets/images/LOGO_MARCA.png" alt="RE-EDUCA Logo">
+                <span>RE-EDUCA</span>
+            </a>
+            
+            <ul class="navbar-nav">
+                <li>
+                    <a href="../index.html">
+                        <i data-lucide="home"></i>
+                        <span>Início</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="../index.html#produtos">
+                        <i data-lucide="book-open"></i>
+                        <span>E-books</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="../index.html#ferramentas" class="active">
+                        <i data-lucide="calculator"></i>
+                        <span>Ferramentas</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="../index.html#sobre">
+                        <i data-lucide="info"></i>
+                        <span>Sobre</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="../index.html#contato">
+                        <i data-lucide="mail"></i>
+                        <span>Contato</span>
+                    </a>
+                </li>
+                <li id="auth-nav-item">
+                    <a href="../login.html">
+                        <i data-lucide="user"></i>
+                        <span>Entrar</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Header da Página -->
+    <section class="section-sm bg-gray-50">
+        <div class="container">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold mb-4">Calculadora de IMC Avançada</h1>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+                    Calcule seu Índice de Massa Corporal, descubra sua classificação e receba orientações personalizadas 
+                    para manter um peso saudável. Acompanhe sua evolução ao longo do tempo.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Conteúdo Principal -->
+    <section class="section">
+        <div class="container">
+            <div class="grid grid-cols-2 gap-8">
+                <!-- Calculadora -->
+                <div>
+                    <div class="imc-calculator">
+                        <h2 class="text-2xl font-bold mb-6 text-center">Calcule seu IMC</h2>
+                        
+                        <form id="imc-form">
+                            <!-- Seletor de Gênero -->
+                            <div class="form-group">
+                                <label class="form-label">Gênero</label>
+                                <div class="gender-selector">
+                                    <div class="gender-option" data-gender="male">
+                                        <div class="gender-icon">
+                                            <i data-lucide="user"></i>
+                                        </div>
+                                        <div>Masculino</div>
+                                    </div>
+                                    <div class="gender-option" data-gender="female">
+                                        <div class="gender-icon">
+                                            <i data-lucide="user"></i>
+                                        </div>
+                                        <div>Feminino</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Idade -->
+                            <div class="form-group">
+                                <label class="form-label" for="age">Idade</label>
+                                <div class="input-group">
+                                    <input type="number" id="age" class="form-input" min="1" max="120" placeholder="Ex: 30">
+                                    <div class="input-unit">anos</div>
+                                </div>
+                            </div>
+
+                            <!-- Peso -->
+                            <div class="form-group">
+                                <label class="form-label" for="weight">Peso</label>
+                                <div class="input-group">
+                                    <input type="number" id="weight" class="form-input" step="0.1" min="1" max="500" placeholder="Ex: 70.5" required>
+                                    <div class="input-unit">kg</div>
+                                </div>
+                            </div>
+
+                            <!-- Altura -->
+                            <div class="form-group">
+                                <label class="form-label" for="height">Altura</label>
+                                <div class="input-group">
+                                    <input type="number" id="height" class="form-input" step="0.01" min="0.5" max="3" placeholder="Ex: 1.75" required>
+                                    <div class="input-unit">m</div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-full btn-lg">
+                                <i data-lucide="calculator"></i>
+                                <span>Calcular IMC</span>
+                            </button>
+                        </form>
+
+                        <!-- Resultado -->
+                        <div id="imc-result" class="imc-result" style="display: none;">
+                            <h3>Seu IMC é:</h3>
+                            <div id="imc-value" class="imc-value">0.0</div>
+                            <div id="imc-classification" class="imc-classification">Classificação</div>
+                            <div id="imc-description" class="text-gray-600"></div>
+                            
+                            <!-- Faixa de Peso Ideal -->
+                            <div id="weight-range" class="weight-range">
+                                <div class="weight-range-title">Faixa de Peso Ideal para sua Altura</div>
+                                <div class="weight-range-values">
+                                    <div class="weight-range-item">
+                                        <div id="min-weight" class="weight-range-value">0 kg</div>
+                                        <div class="weight-range-label">Mínimo</div>
+                                    </div>
+                                    <div class="weight-range-item">
+                                        <div id="max-weight" class="weight-range-value">0 kg</div>
+                                        <div class="weight-range-label">Máximo</div>
+                                    </div>
+                                    <div class="weight-range-item">
+                                        <div id="ideal-weight" class="weight-range-value">0 kg</div>
+                                        <div class="weight-range-label">Ideal</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button id="save-result" class="btn btn-secondary mt-4" style="display: none;">
+                                <i data-lucide="save"></i>
+                                <span>Salvar Resultado</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tabela de Classificação -->
+                    <div class="imc-table">
+                        <h3 class="text-xl font-bold mb-4">Classificação do IMC</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>IMC</th>
+                                    <th>Classificação</th>
+                                    <th>Grau de Obesidade</th>
+                                </tr>
+                            </thead>
+                            <tbody id="imc-table-body">
+                                <tr data-range="underweight">
+                                    <td>Menor que 18,5</td>
+                                    <td>Magreza</td>
+                                    <td>0</td>
+                                </tr>
+                                <tr data-range="normal">
+                                    <td>18,5 a 24,9</td>
+                                    <td>Normal</td>
+                                    <td>0</td>
+                                </tr>
+                                <tr data-range="overweight">
+                                    <td>25,0 a 29,9</td>
+                                    <td>Sobrepeso</td>
+                                    <td>I</td>
+                                </tr>
+                                <tr data-range="obese1">
+                                    <td>30,0 a 34,9</td>
+                                    <td>Obesidade</td>
+                                    <td>II</td>
+                                </tr>
+                                <tr data-range="obese2">
+                                    <td>35,0 a 39,9</td>
+                                    <td>Obesidade Severa</td>
+                                    <td>III</td>
+                                </tr>
+                                <tr data-range="obese3">
+                                    <td>Maior que 40,0</td>
+                                    <td>Obesidade Mórbida</td>
+                                    <td>IV</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Dicas e Histórico -->
+                <div>
+                    <!-- Dicas Personalizadas -->
+                    <div id="tips-section" class="tips-section" style="display: none;">
+                        <h3 class="text-xl font-bold mb-4">Dicas Personalizadas</h3>
+                        <div id="tips-container">
+                            <!-- Dicas serão inseridas dinamicamente -->
+                        </div>
+                    </div>
+
+                    <!-- Histórico -->
+                    <div id="history-section" class="history-section" style="display: none;">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold">Histórico de IMC</h3>
+                            <button id="clear-history" class="btn btn-outline btn-sm">
+                                <i data-lucide="trash-2"></i>
+                                <span>Limpar</span>
+                            </button>
+                        </div>
+                        <div id="history-container">
+                            <!-- Histórico será inserido dinamicamente -->
+                        </div>
+                    </div>
+
+                    <!-- Gráfico de Evolução -->
+                    <div id="chart-section" class="chart-container" style="display: none;">
+                        <h3 class="text-xl font-bold mb-4">Evolução do IMC</h3>
+                        <canvas id="imc-chart" width="400" height="200"></canvas>
+                    </div>
+
+                    <!-- Informações Adicionais -->
+                    <div class="tips-section">
+                        <h3 class="text-xl font-bold mb-4">Informações Importantes</h3>
+                        
+                        <div class="tip-card">
+                            <div class="tip-icon">
+                                <i data-lucide="info"></i>
+                            </div>
+                            <div class="tip-title">Sobre o IMC</div>
+                            <div class="tip-description">
+                                O Índice de Massa Corporal é uma medida internacional usada para calcular se uma pessoa está no peso ideal. 
+                                É calculado dividindo o peso (em kg) pela altura (em metros) ao quadrado.
+                            </div>
+                        </div>
+
+                        <div class="tip-card">
+                            <div class="tip-icon">
+                                <i data-lucide="alert-triangle"></i>
+                            </div>
+                            <div class="tip-title">Limitações</div>
+                            <div class="tip-description">
+                                O IMC não distingue entre massa muscular e gordura corporal. Atletas podem ter IMC alto devido à massa muscular. 
+                                Consulte sempre um profissional de saúde para avaliação completa.
+                            </div>
+                        </div>
+
+                        <div class="tip-card">
+                            <div class="tip-icon">
+                                <i data-lucide="heart"></i>
+                            </div>
+                            <div class="tip-title">Vida Saudável</div>
+                            <div class="tip-description">
+                                Manter um peso saudável envolve alimentação equilibrada, exercícios regulares, hidratação adequada e sono de qualidade. 
+                                Pequenas mudanças consistentes geram grandes resultados.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container">
+            <div class="grid grid-cols-4 gap-8">
+                <div class="col-span-2">
+                    <div class="flex items-center gap-3 mb-4">
+                        <img src="../assets/images/LOGO_MARCA.png" alt="RE-EDUCA" style="height: 40px;">
+                        <span class="text-xl font-bold">RE-EDUCA | Viva Saudável</span>
+                    </div>
+                    <p class="text-gray-400 mb-4">
+                        Transformando vidas através da educação alimentar e hábitos saudáveis.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Ferramentas</h4>
+                    <ul class="space-y-2">
+                        <li><a href="calculadora-imc.html" class="text-gray-400 hover:text-white">Calculadora IMC</a></li>
+                        <li><a href="balanca-alimentos.html" class="text-gray-400 hover:text-white">Balança de Alimentos</a></li>
+                        <li><a href="calendario-alimentar.html" class="text-gray-400 hover:text-white">Calendário Alimentar</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Suporte</h4>
+                    <ul class="space-y-2">
+                        <li><a href="../index.html#contato" class="text-gray-400 hover:text-white">Contato</a></li>
+                        <li><a href="../login.html" class="text-gray-400 hover:text-white">Área do Cliente</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 RE-EDUCA | Viva Saudável. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Configuração do Supabase
+        const SUPABASE_URL = 'https://xegxcgwasjuszskgpjll.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhlZ3hjZ3dhc2p1c3pza2dwamxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgwMjk4MDMsImV4cCI6MjA2MzYwNTgwM30.2edkluCirLNyqyYdonJoE6BxnR_kLGLYMutfb28096U';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Variáveis globais
+        let currentUser = null;
+        let selectedGender = null;
+        let imcHistory = [];
+        let chart = null;
+
+        // Classificações do IMC
+        const imcClassifications = {
+            underweight: {
+                name: 'Magreza',
+                description: 'Você está abaixo do peso ideal. Considere consultar um nutricionista.',
+                color: '#3B82F6',
+                tips: [
+                    'Aumente gradualmente a ingestão calórica com alimentos nutritivos',
+                    'Inclua proteínas de qualidade em todas as refeições',
+                    'Pratique exercícios de fortalecimento muscular',
+                    'Consulte um profissional de saúde para orientação personalizada'
+                ]
+            },
+            normal: {
+                name: 'Peso Normal',
+                description: 'Parabéns! Você está na faixa de peso ideal para sua altura.',
+                color: '#10B981',
+                tips: [
+                    'Mantenha uma alimentação equilibrada e variada',
+                    'Continue praticando exercícios regularmente',
+                    'Monitore seu peso periodicamente',
+                    'Mantenha hábitos saudáveis de sono e hidratação'
+                ]
+            },
+            overweight: {
+                name: 'Sobrepeso',
+                description: 'Você está acima do peso ideal. Pequenas mudanças podem fazer diferença.',
+                color: '#F59E0B',
+                tips: [
+                    'Reduza gradualmente a ingestão calórica',
+                    'Aumente o consumo de frutas e vegetais',
+                    'Pratique atividades físicas regulares',
+                    'Evite alimentos processados e bebidas açucaradas'
+                ]
+            },
+            obese1: {
+                name: 'Obesidade Grau I',
+                description: 'É importante buscar orientação profissional para um plano de emagrecimento.',
+                color: '#EF4444',
+                tips: [
+                    'Procure orientação de nutricionista e educador físico',
+                    'Estabeleça metas realistas de perda de peso',
+                    'Foque em mudanças de hábitos sustentáveis',
+                    'Monitore sua saúde regularmente'
+                ]
+            },
+            obese2: {
+                name: 'Obesidade Grau II',
+                description: 'Obesidade severa. Recomenda-se acompanhamento médico especializado.',
+                color: '#DC2626',
+                tips: [
+                    'Busque acompanhamento médico especializado',
+                    'Considere tratamentos multidisciplinares',
+                    'Avalie riscos cardiovasculares',
+                    'Implemente mudanças graduais e sustentáveis'
+                ]
+            },
+            obese3: {
+                name: 'Obesidade Grau III',
+                description: 'Obesidade mórbida. É essencial buscar tratamento médico imediato.',
+                color: '#B91C1C',
+                tips: [
+                    'Procure tratamento médico especializado urgente',
+                    'Considere cirurgia bariátrica se indicada',
+                    'Monitore complicações associadas',
+                    'Tenha suporte psicológico durante o tratamento'
+                ]
+            }
+        };
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', async () => {
+            lucide.createIcons();
+            await checkAuth();
+            setupEventListeners();
+            loadHistory();
+        });
+
+        // Verificar autenticação
+        async function checkAuth() {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                
+                if (session) {
+                    currentUser = session.user;
+                    updateAuthUI(true);
+                    document.getElementById('save-result').style.display = 'inline-flex';
+                } else {
+                    updateAuthUI(false);
+                }
+            } catch (error) {
+                console.error('Erro ao verificar autenticação:', error);
+            }
+        }
+
+        // Atualizar interface de autenticação
+        function updateAuthUI(isLoggedIn) {
+            const authNavItem = document.getElementById('auth-nav-item');
+            
+            if (isLoggedIn) {
+                authNavItem.innerHTML = `
+                    <a href="../dashboard.html">
+                        <i data-lucide="layout-dashboard"></i>
+                        <span>Dashboard</span>
+                    </a>
+                `;
+            } else {
+                authNavItem.innerHTML = `
+                    <a href="../login.html">
+                        <i data-lucide="user"></i>
+                        <span>Entrar</span>
+                    </a>
+                `;
+            }
+            
+            lucide.createIcons();
+        }
+
+        // Configurar event listeners
+        function setupEventListeners() {
+            // Formulário
+            document.getElementById('imc-form').addEventListener('submit', calculateIMC);
+            
+            // Seletor de gênero
+            document.querySelectorAll('.gender-option').forEach(option => {
+                option.addEventListener('click', () => selectGender(option.dataset.gender));
+            });
+
+            // Botões
+            document.getElementById('save-result').addEventListener('click', saveResult);
+            document.getElementById('clear-history').addEventListener('click', clearHistory);
+
+            // Inputs com validação em tempo real
+            document.getElementById('weight').addEventListener('input', validateInputs);
+            document.getElementById('height').addEventListener('input', validateInputs);
+        }
+
+        // Selecionar gênero
+        function selectGender(gender) {
+            selectedGender = gender;
+            
+            document.querySelectorAll('.gender-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            document.querySelector(`[data-gender="${gender}"]`).classList.add('selected');
+        }
+
+        // Validar inputs
+        function validateInputs() {
+            const weight = parseFloat(document.getElementById('weight').value);
+            const height = parseFloat(document.getElementById('height').value);
+            
+            if (weight && height) {
+                // Calcular automaticamente se ambos os valores estão preenchidos
+                const imc = weight / (height * height);
+                if (imc > 0 && imc < 100) {
+                    // Mostrar preview do resultado
+                    showIMCPreview(imc);
+                }
+            }
+        }
+
+        // Mostrar preview do IMC
+        function showIMCPreview(imc) {
+            const classification = getIMCClassification(imc);
+            const resultElement = document.getElementById('imc-result');
+            
+            if (resultElement.style.display === 'none') {
+                document.getElementById('imc-value').textContent = imc.toFixed(1);
+                document.getElementById('imc-classification').textContent = classification.name;
+                document.getElementById('imc-classification').style.color = classification.color;
+                resultElement.style.display = 'block';
+            }
+        }
+
+        // Calcular IMC
+        function calculateIMC(e) {
+            e.preventDefault();
+            
+            const weight = parseFloat(document.getElementById('weight').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const age = parseInt(document.getElementById('age').value);
+            
+            if (!weight || !height) {
+                showNotification('Por favor, preencha peso e altura', 'error');
+                return;
+            }
+            
+            const imc = weight / (height * height);
+            const classification = getIMCClassification(imc);
+            
+            // Mostrar resultado
+            displayResult(imc, classification, weight, height, age);
+            
+            // Mostrar dicas
+            showTips(classification);
+            
+            // Calcular faixa de peso ideal
+            calculateIdealWeight(height);
+            
+            // Destacar linha na tabela
+            highlightTableRow(classification);
+            
+            // Registrar no histórico local
+            addToLocalHistory(imc, classification, weight, height);
+        }
+
+        // Obter classificação do IMC
+        function getIMCClassification(imc) {
+            if (imc < 18.5) return imcClassifications.underweight;
+            if (imc < 25) return imcClassifications.normal;
+            if (imc < 30) return imcClassifications.overweight;
+            if (imc < 35) return imcClassifications.obese1;
+            if (imc < 40) return imcClassifications.obese2;
+            return imcClassifications.obese3;
+        }
+
+        // Exibir resultado
+        function displayResult(imc, classification, weight, height, age) {
+            document.getElementById('imc-value').textContent = imc.toFixed(1);
+            document.getElementById('imc-classification').textContent = classification.name;
+            document.getElementById('imc-classification').style.color = classification.color;
+            document.getElementById('imc-description').textContent = classification.description;
+            
+            document.getElementById('imc-result').style.display = 'block';
+            
+            // Scroll suave para o resultado
+            document.getElementById('imc-result').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'nearest' 
+            });
+        }
+
+        // Mostrar dicas personalizadas
+        function showTips(classification) {
+            const tipsContainer = document.getElementById('tips-container');
+            const tipsSection = document.getElementById('tips-section');
+            
+            tipsContainer.innerHTML = classification.tips.map(tip => `
+                <div class="tip-card">
+                    <div class="tip-icon" style="color: ${classification.color}">
+                        <i data-lucide="lightbulb"></i>
+                    </div>
+                    <div class="tip-description">${tip}</div>
+                </div>
+            `).join('');
+            
+            tipsSection.style.display = 'block';
+            lucide.createIcons();
+        }
+
+        // Calcular peso ideal
+        function calculateIdealWeight(height) {
+            const minWeight = 18.5 * height * height;
+            const maxWeight = 24.9 * height * height;
+            const idealWeight = 22 * height * height; // IMC 22 é considerado ideal
+            
+            document.getElementById('min-weight').textContent = minWeight.toFixed(1) + ' kg';
+            document.getElementById('max-weight').textContent = maxWeight.toFixed(1) + ' kg';
+            document.getElementById('ideal-weight').textContent = idealWeight.toFixed(1) + ' kg';
+        }
+
+        // Destacar linha na tabela
+        function highlightTableRow(classification) {
+            // Remover destaque anterior
+            document.querySelectorAll('#imc-table-body tr').forEach(row => {
+                row.classList.remove('highlight');
+            });
+            
+            // Adicionar destaque na linha correspondente
+            const ranges = {
+                'Magreza': 'underweight',
+                'Peso Normal': 'normal',
+                'Sobrepeso': 'overweight',
+                'Obesidade Grau I': 'obese1',
+                'Obesidade Grau II': 'obese2',
+                'Obesidade Grau III': 'obese3'
+            };
+            
+            const rangeKey = Object.keys(ranges).find(key => classification.name.includes(key.split(' ')[0]));
+            if (rangeKey) {
+                const row = document.querySelector(`[data-range="${ranges[rangeKey]}"]`);
+                if (row) row.classList.add('highlight');
+            }
+        }
+
+        // Adicionar ao histórico local
+        function addToLocalHistory(imc, classification, weight, height) {
+            const historyItem = {
+                date: new Date().toISOString(),
+                imc: imc.toFixed(1),
+                classification: classification.name,
+                weight: weight,
+                height: height,
+                color: classification.color
+            };
+            
+            imcHistory.unshift(historyItem);
+            
+            // Manter apenas os últimos 10 registros
+            if (imcHistory.length > 10) {
+                imcHistory = imcHistory.slice(0, 10);
+            }
+            
+            // Salvar no localStorage
+            localStorage.setItem('imcHistory', JSON.stringify(imcHistory));
+            
+            // Atualizar exibição
+            displayHistory();
+            updateChart();
+        }
+
+        // Carregar histórico
+        function loadHistory() {
+            const saved = localStorage.getItem('imcHistory');
+            if (saved) {
+                imcHistory = JSON.parse(saved);
+                displayHistory();
+                updateChart();
+            }
+        }
+
+        // Exibir histórico
+        function displayHistory() {
+            const historyContainer = document.getElementById('history-container');
+            const historySection = document.getElementById('history-section');
+            
+            if (imcHistory.length === 0) {
+                historySection.style.display = 'none';
+                return;
+            }
+            
+            historyContainer.innerHTML = imcHistory.map(item => `
+                <div class="history-item">
+                    <div>
+                        <div class="history-date">${new Date(item.date).toLocaleDateString('pt-BR')}</div>
+                        <div class="text-sm text-gray-600">${item.weight}kg - ${item.height}m</div>
+                    </div>
+                    <div class="history-values">
+                        <div class="history-imc" style="color: ${item.color}">${item.imc}</div>
+                        <div class="history-classification">${item.classification}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            historySection.style.display = 'block';
+        }
+
+        // Atualizar gráfico
+        function updateChart() {
+            const chartSection = document.getElementById('chart-section');
+            
+            if (imcHistory.length < 2) {
+                chartSection.style.display = 'none';
+                return;
+            }
+            
+            chartSection.style.display = 'block';
+            
+            const ctx = document.getElementById('imc-chart').getContext('2d');
+            
+            if (chart) {
+                chart.destroy();
+            }
+            
+            const data = imcHistory.slice().reverse().slice(-10); // Últimos 10 registros em ordem cronológica
+            
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(item => new Date(item.date).toLocaleDateString('pt-BR')),
+                    datasets: [{
+                        label: 'IMC',
+                        data: data.map(item => parseFloat(item.imc)),
+                        borderColor: 'rgb(123, 160, 91)',
+                        backgroundColor: 'rgba(123, 160, 91, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: Math.min(...data.map(item => parseFloat(item.imc))) - 2,
+                            max: Math.max(...data.map(item => parseFloat(item.imc))) + 2,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Salvar resultado no Supabase
+        async function saveResult() {
+            if (!currentUser) {
+                showNotification('Faça login para salvar seus resultados', 'error');
+                return;
+            }
+            
+            const weight = parseFloat(document.getElementById('weight').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const age = parseInt(document.getElementById('age').value);
+            
+            if (!weight || !height) {
+                showNotification('Calcule o IMC primeiro', 'error');
+                return;
+            }
+            
+            const imc = weight / (height * height);
+            const classification = getIMCClassification(imc);
+            
+            try {
+                const { data, error } = await supabase
+                    .from('imc_calculations')
+                    .insert([{
+                        user_id: currentUser.id,
+                        weight: weight,
+                        height: height,
+                        age: age,
+                        gender: selectedGender,
+                        imc_value: imc,
+                        classification: classification.name
+                    }]);
+
+                if (error) throw error;
+
+                showNotification('Resultado salvo com sucesso!', 'success');
+
+            } catch (error) {
+                console.error('Erro ao salvar resultado:', error);
+                showNotification('Erro ao salvar resultado', 'error');
+            }
+        }
+
+        // Limpar histórico
+        function clearHistory() {
+            if (confirm('Tem certeza que deseja limpar todo o histórico?')) {
+                imcHistory = [];
+                localStorage.removeItem('imcHistory');
+                document.getElementById('history-section').style.display = 'none';
+                document.getElementById('chart-section').style.display = 'none';
+                if (chart) {
+                    chart.destroy();
+                    chart = null;
+                }
+                showNotification('Histórico limpo com sucesso!', 'success');
+            }
+        }
+
+        // Mostrar notificação
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500' : 
+                type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+            } text-white`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
+

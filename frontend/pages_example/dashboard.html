@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - RE-EDUCA | Viva Saudável</title>
+    <link rel="stylesheet" href="src/styles/main.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .dashboard-container {
+            min-height: 100vh;
+            background: var(--color-gray-50);
+        }
+        
+        .dashboard-header {
+            background: white;
+            border-bottom: 1px solid var(--color-gray-200);
+            padding: 1.5rem 0;
+        }
+        
+        .dashboard-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .dashboard-logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.25rem;
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+            text-decoration: none;
+        }
+        
+        .dashboard-logo img {
+            height: 40px;
+        }
+        
+        .dashboard-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: var(--font-weight-semibold);
+        }
+        
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .user-name {
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-gray-900);
+        }
+        
+        .user-email {
+            font-size: var(--font-size-sm);
+            color: var(--color-gray-600);
+        }
+        
+        .dashboard-actions {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .dashboard-main {
+            padding: 2rem 0;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+        }
+        
+        .dashboard-sidebar {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            height: fit-content;
+        }
+        
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-lg);
+            color: var(--color-gray-700);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+        }
+        
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: var(--color-primary-light);
+            color: var(--color-primary);
+        }
+        
+        .dashboard-content {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--color-gray-200);
+        }
+        
+        .content-title {
+            font-size: 1.75rem;
+            font-weight: var(--font-weight-bold);
+            color: var(--color-gray-900);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            opacity: 0.9;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: var(--font-weight-bold);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: var(--font-size-sm);
+            opacity: 0.9;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 2rem;
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-gray-900);
+        }
+        
+        .chart-period {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .period-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--color-gray-300);
+            border-radius: var(--radius-lg);
+            background: white;
+            color: var(--color-gray-700);
+            font-size: var(--font-size-sm);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .period-btn.active {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+        
+        .recent-activity {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .activity-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--color-gray-200);
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--color-gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-primary);
+        }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .activity-title {
+            font-weight: var(--font-weight-medium);
+            color: var(--color-gray-900);
+            margin-bottom: 0.25rem;
+        }
+        
+        .activity-description {
+            font-size: var(--font-size-sm);
+            color: var(--color-gray-600);
+        }
+        
+        .activity-time {
+            font-size: var(--font-size-xs);
+            color: var(--color-gray-500);
+        }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .quick-action {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border: 2px solid var(--color-gray-200);
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            color: var(--color-gray-700);
+            transition: all var(--transition-fast);
+        }
+        
+        .quick-action:hover {
+            border-color: var(--color-primary);
+            background: var(--color-primary-light);
+            color: var(--color-primary);
+        }
+        
+        .quick-action-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--color-primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-primary);
+        }
+        
+        .quick-action-content {
+            flex: 1;
+        }
+        
+        .quick-action-title {
+            font-weight: var(--font-weight-medium);
+            margin-bottom: 0.25rem;
+        }
+        
+        .quick-action-description {
+            font-size: var(--font-size-sm);
+            color: var(--color-gray-600);
+        }
+        
+        .loading-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            color: var(--color-gray-500);
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--color-gray-300);
+            border-top: 3px solid var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 1rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--color-gray-500);
+        }
+        
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .empty-state-title {
+            font-size: 1.25rem;
+            font-weight: var(--font-weight-semibold);
+            margin-bottom: 0.5rem;
+        }
+        
+        .empty-state-description {
+            margin-bottom: 1.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-sidebar {
+                order: 2;
+            }
+            
+            .dashboard-content {
+                order: 1;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="container">
+                <nav class="dashboard-nav">
+                    <a href="index.html" class="dashboard-logo">
+                        <img src="assets/images/LOGO_MARCA.png" alt="RE-EDUCA">
+                        <span>RE-EDUCA</span>
+                    </a>
+                    
+                    <div class="dashboard-user">
+                        <div class="user-avatar" id="user-avatar">
+                            <i data-lucide="user"></i>
+                        </div>
+                        <div class="user-info">
+                            <div class="user-name" id="user-name">Carregando...</div>
+                            <div class="user-email" id="user-email">Carregando...</div>
+                        </div>
+                        <div class="dashboard-actions">
+                            <button class="btn btn-outline btn-sm" id="logout-btn">
+                                <i data-lucide="log-out"></i>
+                                <span>Sair</span>
+                            </button>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="dashboard-main">
+            <div class="container">
+                <div class="dashboard-grid">
+                    <!-- Sidebar -->
+                    <aside class="dashboard-sidebar">
+                        <ul class="sidebar-nav">
+                            <li>
+                                <a href="#overview" class="nav-link active" data-section="overview">
+                                    <i data-lucide="layout-dashboard"></i>
+                                    <span>Visão Geral</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#health" class="nav-link" data-section="health">
+                                    <i data-lucide="heart"></i>
+                                    <span>Saúde</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#nutrition" class="nav-link" data-section="nutrition">
+                                    <i data-lucide="apple"></i>
+                                    <span>Nutrição</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#purchases" class="nav-link" data-section="purchases">
+                                    <i data-lucide="shopping-bag"></i>
+                                    <span>Compras</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#profile" class="nav-link" data-section="profile">
+                                    <i data-lucide="user"></i>
+                                    <span>Perfil</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#settings" class="nav-link" data-section="settings">
+                                    <i data-lucide="settings"></i>
+                                    <span>Configurações</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </aside>
+
+                    <!-- Content -->
+                    <div class="dashboard-content">
+                        <!-- Overview Section -->
+                        <div id="overview-section" class="content-section">
+                            <div class="content-header">
+                                <h1 class="content-title">Visão Geral</h1>
+                                <div class="text-sm text-gray-600" id="last-login">
+                                    Último acesso: Carregando...
+                                </div>
+                            </div>
+
+                            <!-- Stats Cards -->
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-icon">
+                                        <i data-lucide="calendar"></i>
+                                    </div>
+                                    <div class="stat-value" id="total-meals">0</div>
+                                    <div class="stat-label">Refeições Registradas</div>
+                                </div>
+                                
+                                <div class="stat-card">
+                                    <div class="stat-icon">
+                                        <i data-lucide="activity"></i>
+                                    </div>
+                                    <div class="stat-value" id="total-imc">0</div>
+                                    <div class="stat-label">Cálculos de IMC</div>
+                                </div>
+                                
+                                <div class="stat-card">
+                                    <div class="stat-icon">
+                                        <i data-lucide="scale"></i>
+                                    </div>
+                                    <div class="stat-value" id="total-analyses">0</div>
+                                    <div class="stat-label">Análises de Alimentos</div>
+                                </div>
+                                
+                                <div class="stat-card">
+                                    <div class="stat-icon">
+                                        <i data-lucide="shopping-cart"></i>
+                                    </div>
+                                    <div class="stat-value" id="total-orders">0</div>
+                                    <div class="stat-label">Pedidos Realizados</div>
+                                </div>
+                            </div>
+
+                            <!-- Charts -->
+                            <div class="chart-container">
+                                <div class="chart-header">
+                                    <h3 class="chart-title">Atividade dos Últimos 30 Dias</h3>
+                                    <div class="chart-period">
+                                        <button class="period-btn active" data-period="7">7 dias</button>
+                                        <button class="period-btn" data-period="30">30 dias</button>
+                                        <button class="period-btn" data-period="90">90 dias</button>
+                                    </div>
+                                </div>
+                                <canvas id="activity-chart" width="400" height="200"></canvas>
+                            </div>
+
+                            <!-- Recent Activity -->
+                            <div class="recent-activity">
+                                <h3 class="chart-title mb-4">Atividades Recentes</h3>
+                                <ul class="activity-list" id="recent-activities">
+                                    <li class="loading-state">
+                                        <div class="loading-spinner"></div>
+                                        <span>Carregando atividades...</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Quick Actions -->
+                            <div class="quick-actions">
+                                <a href="tools/calendario-alimentar.html" class="quick-action">
+                                    <div class="quick-action-icon">
+                                        <i data-lucide="calendar"></i>
+                                    </div>
+                                    <div class="quick-action-content">
+                                        <div class="quick-action-title">Calendário Alimentar</div>
+                                        <div class="quick-action-description">Registre suas refeições</div>
+                                    </div>
+                                </a>
+                                
+                                <a href="tools/calculadora-imc.html" class="quick-action">
+                                    <div class="quick-action-icon">
+                                        <i data-lucide="calculator"></i>
+                                    </div>
+                                    <div class="quick-action-content">
+                                        <div class="quick-action-title">Calculadora IMC</div>
+                                        <div class="quick-action-description">Calcule seu IMC</div>
+                                    </div>
+                                </a>
+                                
+                                <a href="tools/balanca-alimentos.html" class="quick-action">
+                                    <div class="quick-action-icon">
+                                        <i data-lucide="scale"></i>
+                                    </div>
+                                    <div class="quick-action-content">
+                                        <div class="quick-action-title">Balança de Alimentos</div>
+                                        <div class="quick-action-description">Analise alimentos</div>
+                                    </div>
+                                </a>
+                                
+                                <a href="index.html#produtos" class="quick-action">
+                                    <div class="quick-action-icon">
+                                        <i data-lucide="book-open"></i>
+                                    </div>
+                                    <div class="quick-action-content">
+                                        <div class="quick-action-title">E-books</div>
+                                        <div class="quick-action-description">Explore nossos produtos</div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Health Section -->
+                        <div id="health-section" class="content-section" style="display: none;">
+                            <div class="content-header">
+                                <h1 class="content-title">Saúde</h1>
+                            </div>
+                            
+                            <div class="empty-state">
+                                <div class="empty-state-icon">
+                                    <i data-lucide="heart"></i>
+                                </div>
+                                <h3 class="empty-state-title">Seção em Desenvolvimento</h3>
+                                <p class="empty-state-description">
+                                    Esta seção estará disponível em breve com relatórios detalhados de saúde.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Nutrition Section -->
+                        <div id="nutrition-section" class="content-section" style="display: none;">
+                            <div class="content-header">
+                                <h1 class="content-title">Nutrição</h1>
+                            </div>
+                            
+                            <div class="empty-state">
+                                <div class="empty-state-icon">
+                                    <i data-lucide="apple"></i>
+                                </div>
+                                <h3 class="empty-state-title">Seção em Desenvolvimento</h3>
+                                <p class="empty-state-description">
+                                    Esta seção estará disponível em breve com análises nutricionais detalhadas.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Purchases Section -->
+                        <div id="purchases-section" class="content-section" style="display: none;">
+                            <div class="content-header">
+                                <h1 class="content-title">Compras</h1>
+                            </div>
+                            
+                            <div class="empty-state">
+                                <div class="empty-state-icon">
+                                    <i data-lucide="shopping-bag"></i>
+                                </div>
+                                <h3 class="empty-state-title">Nenhuma Compra Realizada</h3>
+                                <p class="empty-state-description">
+                                    Você ainda não realizou nenhuma compra. Explore nossos produtos!
+                                </p>
+                                <a href="index.html#produtos" class="btn btn-primary">
+                                    <i data-lucide="book-open"></i>
+                                    <span>Ver Produtos</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Profile Section -->
+                        <div id="profile-section" class="content-section" style="display: none;">
+                            <div class="content-header">
+                                <h1 class="content-title">Perfil</h1>
+                            </div>
+                            
+                            <div class="empty-state">
+                                <div class="empty-state-icon">
+                                    <i data-lucide="user"></i>
+                                </div>
+                                <h3 class="empty-state-title">Seção em Desenvolvimento</h3>
+                                <p class="empty-state-description">
+                                    Esta seção estará disponível em breve para edição do perfil.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Settings Section -->
+                        <div id="settings-section" class="content-section" style="display: none;">
+                            <div class="content-header">
+                                <h1 class="content-title">Configurações</h1>
+                            </div>
+                            
+                            <div class="empty-state">
+                                <div class="empty-state-icon">
+                                    <i data-lucide="settings"></i>
+                                </div>
+                                <h3 class="empty-state-title">Seção em Desenvolvimento</h3>
+                                <p class="empty-state-description">
+                                    Esta seção estará disponível em breve com configurações da conta.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Configuração do Supabase
+        const SUPABASE_URL = 'https://xegxcgwasjuszskgpjll.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhlZ3hjZ3dhc2p1c3pza2dwamxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgwMjk4MDMsImV4cCI6MjA2MzYwNTgwM30.2edkluCirLNyqyYdonJoE6BxnR_kLGLYMutfb28096U';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Variáveis globais
+        let currentUser = null;
+        let activityChart = null;
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', async () => {
+            lucide.createIcons();
+            await checkAuth();
+            setupEventListeners();
+            await loadDashboardData();
+        });
+
+        // Verificar autenticação
+        async function checkAuth() {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                
+                if (!session) {
+                    window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname);
+                    return;
+                }
+                
+                currentUser = session.user;
+                await loadUserProfile();
+                
+            } catch (error) {
+                console.error('Erro ao verificar autenticação:', error);
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Carregar perfil do usuário
+        async function loadUserProfile() {
+            try {
+                const { data: profile, error } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', currentUser.id)
+                    .single();
+
+                if (error && error.code !== 'PGRST116') {
+                    throw error;
+                }
+
+                // Atualizar interface com dados do usuário
+                const fullName = profile?.full_name || currentUser.user_metadata?.full_name || 'Usuário';
+                const email = profile?.email || currentUser.email;
+                
+                document.getElementById('user-name').textContent = fullName;
+                document.getElementById('user-email').textContent = email;
+                
+                // Atualizar avatar com iniciais
+                const initials = fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                document.getElementById('user-avatar').textContent = initials;
+                
+            } catch (error) {
+                console.error('Erro ao carregar perfil:', error);
+            }
+        }
+
+        // Configurar event listeners
+        function setupEventListeners() {
+            // Logout
+            document.getElementById('logout-btn').addEventListener('click', handleLogout);
+            
+            // Navegação da sidebar
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const section = link.dataset.section;
+                    showSection(section);
+                    
+                    // Atualizar navegação ativa
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                });
+            });
+            
+            // Botões de período do gráfico
+            document.querySelectorAll('.period-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    const period = parseInt(btn.dataset.period);
+                    updateActivityChart(period);
+                });
+            });
+        }
+
+        // Mostrar seção específica
+        function showSection(sectionName) {
+            // Esconder todas as seções
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Mostrar seção selecionada
+            const targetSection = document.getElementById(`${sectionName}-section`);
+            if (targetSection) {
+                targetSection.style.display = 'block';
+            }
+        }
+
+        // Carregar dados do dashboard
+        async function loadDashboardData() {
+            try {
+                await Promise.all([
+                    loadStats(),
+                    loadRecentActivities(),
+                    loadActivityChart(30)
+                ]);
+                
+                // Atualizar último acesso
+                const lastLogin = new Date().toLocaleString('pt-BR');
+                document.getElementById('last-login').textContent = `Último acesso: ${lastLogin}`;
+                
+            } catch (error) {
+                console.error('Erro ao carregar dados do dashboard:', error);
+            }
+        }
+
+        // Carregar estatísticas
+        async function loadStats() {
+            try {
+                // Carregar estatísticas em paralelo
+                const [mealsResult, imcResult, analysesResult, ordersResult] = await Promise.all([
+                    supabase.from('meals').select('id', { count: 'exact' }).eq('user_id', currentUser.id),
+                    supabase.from('imc_calculations').select('id', { count: 'exact' }).eq('user_id', currentUser.id),
+                    supabase.from('food_analyses').select('id', { count: 'exact' }).eq('user_id', currentUser.id),
+                    supabase.from('orders').select('id', { count: 'exact' }).eq('user_id', currentUser.id)
+                ]);
+
+                // Atualizar interface
+                document.getElementById('total-meals').textContent = mealsResult.count || 0;
+                document.getElementById('total-imc').textContent = imcResult.count || 0;
+                document.getElementById('total-analyses').textContent = analysesResult.count || 0;
+                document.getElementById('total-orders').textContent = ordersResult.count || 0;
+
+            } catch (error) {
+                console.error('Erro ao carregar estatísticas:', error);
+            }
+        }
+
+        // Carregar atividades recentes
+        async function loadRecentActivities() {
+            try {
+                const { data: activities, error } = await supabase
+                    .from('user_activities')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+
+                if (error) throw error;
+
+                const activitiesList = document.getElementById('recent-activities');
+                
+                if (!activities || activities.length === 0) {
+                    activitiesList.innerHTML = `
+                        <li class="empty-state">
+                            <div class="empty-state-icon">
+                                <i data-lucide="activity"></i>
+                            </div>
+                            <div class="empty-state-title">Nenhuma Atividade</div>
+                            <div class="empty-state-description">
+                                Suas atividades aparecerão aqui conforme você usar as ferramentas.
+                            </div>
+                        </li>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+
+                activitiesList.innerHTML = activities.map(activity => {
+                    const activityInfo = getActivityInfo(activity.activity_type);
+                    const timeAgo = getTimeAgo(new Date(activity.created_at));
+                    
+                    return `
+                        <li class="activity-item">
+                            <div class="activity-icon">
+                                <i data-lucide="${activityInfo.icon}"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">${activityInfo.title}</div>
+                                <div class="activity-description">${activityInfo.description}</div>
+                            </div>
+                            <div class="activity-time">${timeAgo}</div>
+                        </li>
+                    `;
+                }).join('');
+
+                lucide.createIcons();
+
+            } catch (error) {
+                console.error('Erro ao carregar atividades:', error);
+                document.getElementById('recent-activities').innerHTML = `
+                    <li class="empty-state">
+                        <div class="empty-state-title">Erro ao carregar atividades</div>
+                    </li>
+                `;
+            }
+        }
+
+        // Obter informações da atividade
+        function getActivityInfo(activityType) {
+            const activities = {
+                'login': {
+                    icon: 'log-in',
+                    title: 'Login realizado',
+                    description: 'Você fez login na plataforma'
+                },
+                'register': {
+                    icon: 'user-plus',
+                    title: 'Conta criada',
+                    description: 'Sua conta foi criada com sucesso'
+                },
+                'imc_calculation': {
+                    icon: 'calculator',
+                    title: 'IMC calculado',
+                    description: 'Você calculou seu Índice de Massa Corporal'
+                },
+                'meal_added': {
+                    icon: 'calendar',
+                    title: 'Refeição adicionada',
+                    description: 'Nova refeição registrada no calendário'
+                },
+                'food_analysis': {
+                    icon: 'scale',
+                    title: 'Alimento analisado',
+                    description: 'Análise nutricional realizada'
+                },
+                'product_view': {
+                    icon: 'eye',
+                    title: 'Produto visualizado',
+                    description: 'Você visualizou um produto'
+                },
+                'purchase': {
+                    icon: 'shopping-cart',
+                    title: 'Compra realizada',
+                    description: 'Pedido realizado com sucesso'
+                }
+            };
+
+            return activities[activityType] || {
+                icon: 'activity',
+                title: 'Atividade',
+                description: 'Atividade realizada na plataforma'
+            };
+        }
+
+        // Calcular tempo decorrido
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000);
+            
+            if (diffInSeconds < 60) {
+                return 'Agora mesmo';
+            } else if (diffInSeconds < 3600) {
+                const minutes = Math.floor(diffInSeconds / 60);
+                return `${minutes} min atrás`;
+            } else if (diffInSeconds < 86400) {
+                const hours = Math.floor(diffInSeconds / 3600);
+                return `${hours}h atrás`;
+            } else {
+                const days = Math.floor(diffInSeconds / 86400);
+                return `${days}d atrás`;
+            }
+        }
+
+        // Carregar gráfico de atividades
+        async function loadActivityChart(days = 30) {
+            try {
+                const startDate = new Date();
+                startDate.setDate(startDate.getDate() - days);
+                
+                const { data: activities, error } = await supabase
+                    .from('user_activities')
+                    .select('created_at, activity_type')
+                    .eq('user_id', currentUser.id)
+                    .gte('created_at', startDate.toISOString())
+                    .order('created_at', { ascending: true });
+
+                if (error) throw error;
+
+                updateActivityChart(days, activities);
+
+            } catch (error) {
+                console.error('Erro ao carregar gráfico:', error);
+            }
+        }
+
+        // Atualizar gráfico de atividades
+        function updateActivityChart(days, activities = []) {
+            const ctx = document.getElementById('activity-chart').getContext('2d');
+            
+            if (activityChart) {
+                activityChart.destroy();
+            }
+
+            // Preparar dados para o gráfico
+            const labels = [];
+            const data = [];
+            
+            for (let i = days - 1; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                
+                labels.push(date.toLocaleDateString('pt-BR', { 
+                    day: '2-digit', 
+                    month: '2-digit' 
+                }));
+                
+                const dayActivities = activities.filter(activity => 
+                    activity.created_at.startsWith(dateStr)
+                ).length;
+                
+                data.push(dayActivities);
+            }
+
+            activityChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Atividades',
+                        data: data,
+                        borderColor: 'rgb(123, 160, 91)',
+                        backgroundColor: 'rgba(123, 160, 91, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Processar logout
+        async function handleLogout() {
+            try {
+                const { error } = await supabase.auth.signOut();
+                
+                if (error) throw error;
+                
+                // Limpar dados locais
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                // Redirecionar para página inicial
+                window.location.href = 'index.html';
+                
+            } catch (error) {
+                console.error('Erro ao fazer logout:', error);
+                alert('Erro ao sair. Tente novamente.');
+            }
+        }
+    </script>
+</body>
+</html>
+

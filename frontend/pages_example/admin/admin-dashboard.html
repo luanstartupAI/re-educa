@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo - RE-EDUCA</title>
+    <link rel="stylesheet" href="../src/styles/main.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .admin-container {
+            min-height: 100vh;
+            background: var(--color-gray-50);
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            color: white;
+            padding: 1.5rem 0;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .admin-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .admin-logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.5rem;
+            font-weight: var(--font-weight-bold);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .admin-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .admin-main {
+            padding: 2rem 0;
+        }
+        
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2rem;
+        }
+        
+        .admin-sidebar {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
+        }
+        
+        .sidebar-title {
+            font-size: 1.125rem;
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-gray-900);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--color-gray-200);
+        }
+        
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 1rem;
+            border-radius: var(--radius-lg);
+            color: var(--color-gray-700);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+            font-weight: var(--font-weight-medium);
+        }
+        
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: var(--color-primary-light);
+            color: var(--color-primary);
+        }
+        
+        .admin-content {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            min-height: 600px;
+        }
+        
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--color-gray-200);
+        }
+        
+        .content-title {
+            font-size: 2rem;
+            font-weight: var(--font-weight-bold);
+            color: var(--color-gray-900);
+        }
+        
+        .content-actions {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card.secondary {
+            background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-accent) 100%);
+        }
+        
+        .stat-card.success {
+            background: linear-gradient(135deg, var(--color-success) 0%, #10B981 100%);
+        }
+        
+        .stat-card.warning {
+            background: linear-gradient(135deg, var(--color-warning) 0%, #F59E0B 100%);
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            opacity: 0.9;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: var(--font-weight-bold);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: var(--font-size-sm);
+            opacity: 0.9;
+        }
+        
+        .stat-change {
+            font-size: var(--font-size-xs);
+            margin-top: 0.5rem;
+            opacity: 0.8;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--color-gray-200);
+        }
+        
+        .data-table th {
+            background: var(--color-gray-50);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-gray-900);
+        }
+        
+        .data-table tr:hover {
+            background: var(--color-gray-50);
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-weight-medium);
+        }
+        
+        .status-badge.active {
+            background: var(--color-success-light);
+            color: var(--color-success);
+        }
+        
+        .status-badge.inactive {
+            background: var(--color-gray-200);
+            color: var(--color-gray-600);
+        }
+        
+        .status-badge.pending {
+            background: var(--color-warning-light);
+            color: var(--color-warning);
+        }
+        
+        .status-badge.completed {
+            background: var(--color-success-light);
+            color: var(--color-success);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-md);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .btn-icon.edit {
+            background: var(--color-primary-light);
+            color: var(--color-primary);
+        }
+        
+        .btn-icon.delete {
+            background: var(--color-error-light);
+            color: var(--color-error);
+        }
+        
+        .btn-icon.view {
+            background: var(--color-gray-200);
+            color: var(--color-gray-600);
+        }
+        
+        .btn-icon:hover {
+            transform: scale(1.1);
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 2rem;
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-gray-900);
+        }
+        
+        .loading-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            color: var(--color-gray-500);
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--color-gray-300);
+            border-top: 3px solid var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 1rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--color-gray-500);
+        }
+        
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-fast);
+        }
+        
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--color-gray-200);
+        }
+        
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-gray-900);
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--color-gray-500);
+            cursor: pointer;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .admin-sidebar {
+                order: 2;
+                position: static;
+            }
+            
+            .admin-content {
+                order: 1;
+            }
+            
+            .stats-overview {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="container">
+                <nav class="admin-nav">
+                    <a href="../index.html" class="admin-logo">
+                        <i data-lucide="shield-check"></i>
+                        <span>RE-EDUCA Admin</span>
+                    </a>
+                    
+                    <div class="admin-user">
+                        <div class="user-info">
+                            <div class="user-name" id="admin-name">Administrador</div>
+                            <div class="user-email" id="admin-email">admin@re-educa.com</div>
+                        </div>
+                        <button class="btn btn-outline btn-sm" id="admin-logout">
+                            <i data-lucide="log-out"></i>
+                            <span>Sair</span>
+                        </button>
+                    </div>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <div class="container">
+                <div class="admin-grid">
+                    <!-- Sidebar -->
+                    <aside class="admin-sidebar">
+                        <h3 class="sidebar-title">Painel de Controle</h3>
+                        <ul class="sidebar-nav">
+                            <li>
+                                <a href="#dashboard" class="nav-link active" data-section="dashboard">
+                                    <i data-lucide="layout-dashboard"></i>
+                                    <span>Dashboard</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#users" class="nav-link" data-section="users">
+                                    <i data-lucide="users"></i>
+                                    <span>Usuários</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#products" class="nav-link" data-section="products">
+                                    <i data-lucide="package"></i>
+                                    <span>Produtos</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#orders" class="nav-link" data-section="orders">
+                                    <i data-lucide="shopping-cart"></i>
+                                    <span>Pedidos</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#affiliates" class="nav-link" data-section="affiliates">
+                                    <i data-lucide="link"></i>
+                                    <span>Afiliados</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#analytics" class="nav-link" data-section="analytics">
+                                    <i data-lucide="bar-chart"></i>
+                                    <span>Relatórios</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#settings" class="nav-link" data-section="settings">
+                                    <i data-lucide="settings"></i>
+                                    <span>Configurações</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </aside>
+
+                    <!-- Content -->
+                    <div class="admin-content">
+                        <!-- Dashboard Section -->
+                        <div id="dashboard-section" class="content-section">
+                            <div class="content-header">
+                                <h1 class="content-title">Dashboard</h1>
+                                <div class="content-actions">
+                                    <button class="btn btn-primary" id="refresh-data">
+                                        <i data-lucide="refresh-cw"></i>
+                                        <span>Atualizar</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Stats Overview -->
+                            <div class="stats-overview">
+                                <div class="stat-card">
+                                    <div class="stat-icon">
+                                        <i data-lucide="users"></i>
+                                    </div>
+                                    <div class="stat-value" id="total-users">0</div>
+                                    <div class="stat-label">Usuários Cadastrados</div>
+                                    <div class="stat-change">+12% este mês</div>
+                                </div>
+                                
+                                <div class="stat-card secondary">
+                                    <div class="stat-icon">
+                                        <i data-lucide="package"></i>
+                                    </div>
+                                    <div class="stat-value" id="total-products">0</div>
+                                    <div class="stat-label">Produtos Ativos</div>
+                                    <div class="stat-change">+3 novos</div>
+                                </div>
+                                
+                                <div class="stat-card success">
+                                    <div class="stat-icon">
+                                        <i data-lucide="shopping-cart"></i>
+                                    </div>
+                                    <div class="stat-value" id="total-sales">R$ 0</div>
+                                    <div class="stat-label">Vendas do Mês</div>
+                                    <div class="stat-change">+25% vs mês anterior</div>
+                                </div>
+                                
+                                <div class="stat-card warning">
+                                    <div class="stat-icon">
+                                        <i data-lucide="activity"></i>
+                                    </div>
+                                    <div class="stat-value" id="active-users">0</div>
+                                    <div class="stat-label">Usuários Ativos</div>
+                                    <div class="stat-change">Últimos 7 dias</div>
+                                </div>
+                            </div>
+
+                            <!-- Charts -->
+                            <div class="chart-container">
+                                <div class="chart-header">
+                                    <h3 class="chart-title">Vendas dos Últimos 30 Dias</h3>
+                                </div>
+                                <canvas id="sales-chart" width="400" height="200"></canvas>
+                            </div>
+
+                            <div class="chart-container">
+                                <div class="chart-header">
+                                    <h3 class="chart-title">Novos Usuários</h3>
+                                </div>
+                                <canvas id="users-chart" width="400" height="200"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Users Section -->
+                        <div id="users-section" class="content-section" style="display: none;">
+                            <div class="content-header">
+                                <h1 class="content-title">Usuários</h1>
+                                <div class="content-actions">
+                                    <button class="btn btn-outline" id="export-users">
+                                        <i data-lucide="download"></i>
+                                        <span>Exportar</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="users-table-container">
+                                <div class="loading-state">
+                                    <div class="loading-spinner"></div>
+                                    <span>Carregando usuários...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Products Section -->
+                        <div id="products-section" class="content-section" style="display: none;">
+                            <div class="content-header">
+                                <h1 class="content-title">Produtos</h1>
+                                <div class="content-actions">
+                                    <button class="btn btn-primary" id="add-product">
+                                        <i data-lucide="plus"></i>
+                                        <span>Novo Produto</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="products-table-container">
+                                <div class="loading-state">
+                                    <div class="loading-spinner"></div>
+                                    <span>Carregando produtos...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Orders Section -->
+                        <div id="orders-section" class="content-section" style="display: none;">
+                            <div class="content-header">
+                                <h1 class="content-title">Pedidos</h1>
+                                <div class="content-actions">
+                                    <button class="btn btn-outline" id="export-orders">
+                                        <i data-lucide="download"></i>
+                                        <span>Exportar</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="orders-table-container">
+                                <div class="loading-state">
+                                    <div class="loading-spinner"></div>
+                                    <span>Carregando pedidos...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Affiliates Section -->
+                        <div id="affiliates-section" class="content-section" style="display: none;">
+                            <div class="content-header">
+                                <h1 class="content-title">Plataformas de Afiliados</h1>
+                                <div class="content-actions">
+                                    <button class="btn btn-primary" id="add-affiliate">
+                                        <i data-lucide="plus"></i>
+                                        <span>Nova Plataforma</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="affiliates-table-container">
+                                <div class="loading-state">
+                                    <div class="loading-spinner"></div>
+                                    <span>Carregando plataformas...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Analytics Section -->
+                        <div id="analytics-section" class="content-section" style="display: none;">
+                            <div class="content-header">
+                                <h1 class="content-title">Relatórios e Análises</h1>
+                            </div>
+                            
+                            <div class="empty-state">
+                                <div class="empty-state-icon">
+                                    <i data-lucide="bar-chart"></i>
+                                </div>
+                                <h3>Relatórios Avançados</h3>
+                                <p>Esta seção estará disponível em breve com relatórios detalhados de vendas, usuários e performance.</p>
+                            </div>
+                        </div>
+
+                        <!-- Settings Section -->
+                        <div id="settings-section" class="content-section" style="display: none;">
+                            <div class="content-header">
+                                <h1 class="content-title">Configurações do Sistema</h1>
+                            </div>
+                            
+                            <div class="empty-state">
+                                <div class="empty-state-icon">
+                                    <i data-lucide="settings"></i>
+                                </div>
+                                <h3>Configurações</h3>
+                                <p>Esta seção estará disponível em breve para configurações avançadas do sistema.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para adicionar/editar produto -->
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Adicionar Produto</h3>
+                <button class="modal-close" id="close-product-modal">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <form id="product-form">
+                <div class="form-group">
+                    <label class="form-label">Nome do Produto</label>
+                    <input type="text" class="form-input" id="product-name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Tipo</label>
+                    <select class="form-select" id="product-type" required>
+                        <option value="">Selecione...</option>
+                        <option value="own">Produto Próprio</option>
+                        <option value="affiliate">Produto Afiliado</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Preço (R$)</label>
+                    <input type="number" class="form-input" id="product-price" step="0.01" required>
+                </div>
+                
+                <div class="form-group" id="affiliate-fields" style="display: none;">
+                    <label class="form-label">Plataforma de Afiliados</label>
+                    <select class="form-select" id="affiliate-platform">
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="affiliate-url-field" style="display: none;">
+                    <label class="form-label">URL de Afiliado</label>
+                    <input type="url" class="form-input" id="affiliate-url">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Descrição</label>
+                    <textarea class="form-input" id="product-description" rows="3"></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" id="cancel-product">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Produto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Configuração do Supabase
+        const SUPABASE_URL = 'https://xegxcgwasjuszskgpjll.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhlZ3hjZ3dhc2p1c3pza2dwamxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgwMjk4MDMsImV4cCI6MjA2MzYwNTgwM30.2edkluCirLNyqyYdonJoE6BxnR_kLGLYMutfb28096U';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Variáveis globais
+        let currentAdmin = null;
+        let salesChart = null;
+        let usersChart = null;
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', async () => {
+            lucide.createIcons();
+            await checkAdminAuth();
+            setupEventListeners();
+            await loadDashboardData();
+        });
+
+        // Verificar autenticação de admin
+        async function checkAdminAuth() {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                
+                if (!session) {
+                    window.location.href = '../login.html?redirect=' + encodeURIComponent(window.location.pathname);
+                    return;
+                }
+                
+                // Verificar se é admin
+                const { data: profile, error } = await supabase
+                    .from('profiles')
+                    .select('is_admin, full_name, email')
+                    .eq('id', session.user.id)
+                    .single();
+
+                if (error || !profile?.is_admin) {
+                    alert('Acesso negado. Você não tem permissões de administrador.');
+                    window.location.href = '../dashboard.html';
+                    return;
+                }
+                
+                currentAdmin = session.user;
+                document.getElementById('admin-name').textContent = profile.full_name || 'Administrador';
+                document.getElementById('admin-email').textContent = profile.email;
+                
+            } catch (error) {
+                console.error('Erro ao verificar autenticação:', error);
+                window.location.href = '../login.html';
+            }
+        }
+
+        // Configurar event listeners
+        function setupEventListeners() {
+            // Logout
+            document.getElementById('admin-logout').addEventListener('click', handleLogout);
+            
+            // Navegação da sidebar
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const section = link.dataset.section;
+                    showSection(section);
+                    
+                    // Atualizar navegação ativa
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                });
+            });
+            
+            // Botões de ação
+            document.getElementById('refresh-data').addEventListener('click', loadDashboardData);
+            document.getElementById('add-product').addEventListener('click', showProductModal);
+            document.getElementById('close-product-modal').addEventListener('click', hideProductModal);
+            document.getElementById('cancel-product').addEventListener('click', hideProductModal);
+            
+            // Formulário de produto
+            document.getElementById('product-form').addEventListener('submit', handleProductSubmit);
+            document.getElementById('product-type').addEventListener('change', toggleAffiliateFields);
+        }
+
+        // Mostrar seção específica
+        function showSection(sectionName) {
+            // Esconder todas as seções
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Mostrar seção selecionada
+            const targetSection = document.getElementById(`${sectionName}-section`);
+            if (targetSection) {
+                targetSection.style.display = 'block';
+                
+                // Carregar dados específicos da seção
+                switch(sectionName) {
+                    case 'users':
+                        loadUsersData();
+                        break;
+                    case 'products':
+                        loadProductsData();
+                        break;
+                    case 'orders':
+                        loadOrdersData();
+                        break;
+                    case 'affiliates':
+                        loadAffiliatesData();
+                        break;
+                }
+            }
+        }
+
+        // Carregar dados do dashboard
+        async function loadDashboardData() {
+            try {
+                await Promise.all([
+                    loadStats(),
+                    loadSalesChart(),
+                    loadUsersChart()
+                ]);
+            } catch (error) {
+                console.error('Erro ao carregar dados do dashboard:', error);
+            }
+        }
+
+        // Carregar estatísticas
+        async function loadStats() {
+            try {
+                const [usersResult, productsResult, ordersResult] = await Promise.all([
+                    supabase.from('profiles').select('id', { count: 'exact' }),
+                    supabase.from('products').select('id', { count: 'exact' }).eq('status', 'published'),
+                    supabase.from('orders').select('total_amount').eq('status', 'completed')
+                ]);
+
+                // Atualizar estatísticas
+                document.getElementById('total-users').textContent = usersResult.count || 0;
+                document.getElementById('total-products').textContent = productsResult.count || 0;
+                
+                const totalSales = ordersResult.data?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0;
+                document.getElementById('total-sales').textContent = formatCurrency(totalSales);
+                
+                // Usuários ativos (últimos 7 dias)
+                const sevenDaysAgo = new Date();
+                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                
+                const { count: activeUsers } = await supabase
+                    .from('user_activities')
+                    .select('user_id', { count: 'exact' })
+                    .gte('created_at', sevenDaysAgo.toISOString());
+                
+                document.getElementById('active-users').textContent = activeUsers || 0;
+
+            } catch (error) {
+                console.error('Erro ao carregar estatísticas:', error);
+            }
+        }
+
+        // Carregar gráfico de vendas
+        async function loadSalesChart() {
+            try {
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                
+                const { data: orders, error } = await supabase
+                    .from('orders')
+                    .select('created_at, total_amount')
+                    .eq('status', 'completed')
+                    .gte('created_at', thirtyDaysAgo.toISOString())
+                    .order('created_at', { ascending: true });
+
+                if (error) throw error;
+
+                const ctx = document.getElementById('sales-chart').getContext('2d');
+                
+                if (salesChart) {
+                    salesChart.destroy();
+                }
+
+                // Preparar dados
+                const labels = [];
+                const data = [];
+                
+                for (let i = 29; i >= 0; i--) {
+                    const date = new Date();
+                    date.setDate(date.getDate() - i);
+                    const dateStr = date.toISOString().split('T')[0];
+                    
+                    labels.push(date.toLocaleDateString('pt-BR', { 
+                        day: '2-digit', 
+                        month: '2-digit' 
+                    }));
+                    
+                    const dayOrders = orders?.filter(order => 
+                        order.created_at.startsWith(dateStr)
+                    ) || [];
+                    
+                    const dayTotal = dayOrders.reduce((sum, order) => sum + order.total_amount, 0);
+                    data.push(dayTotal);
+                }
+
+                salesChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Vendas (R$)',
+                            data: data,
+                            borderColor: 'rgb(123, 160, 91)',
+                            backgroundColor: 'rgba(123, 160, 91, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return 'R$ ' + value.toFixed(2);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error('Erro ao carregar gráfico de vendas:', error);
+            }
+        }
+
+        // Carregar gráfico de usuários
+        async function loadUsersChart() {
+            try {
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                
+                const { data: users, error } = await supabase
+                    .from('profiles')
+                    .select('created_at')
+                    .gte('created_at', thirtyDaysAgo.toISOString())
+                    .order('created_at', { ascending: true });
+
+                if (error) throw error;
+
+                const ctx = document.getElementById('users-chart').getContext('2d');
+                
+                if (usersChart) {
+                    usersChart.destroy();
+                }
+
+                // Preparar dados
+                const labels = [];
+                const data = [];
+                
+                for (let i = 29; i >= 0; i--) {
+                    const date = new Date();
+                    date.setDate(date.getDate() - i);
+                    const dateStr = date.toISOString().split('T')[0];
+                    
+                    labels.push(date.toLocaleDateString('pt-BR', { 
+                        day: '2-digit', 
+                        month: '2-digit' 
+                    }));
+                    
+                    const dayUsers = users?.filter(user => 
+                        user.created_at.startsWith(dateStr)
+                    ).length || 0;
+                    
+                    data.push(dayUsers);
+                }
+
+                usersChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Novos Usuários',
+                            data: data,
+                            backgroundColor: 'rgba(123, 160, 91, 0.8)',
+                            borderColor: 'rgb(123, 160, 91)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error('Erro ao carregar gráfico de usuários:', error);
+            }
+        }
+
+        // Carregar dados de usuários
+        async function loadUsersData() {
+            try {
+                const container = document.getElementById('users-table-container');
+                container.innerHTML = `
+                    <div class="loading-state">
+                        <div class="loading-spinner"></div>
+                        <span>Carregando usuários...</span>
+                    </div>
+                `;
+
+                const { data: users, error } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(100);
+
+                if (error) throw error;
+
+                if (!users || users.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <i data-lucide="users"></i>
+                            </div>
+                            <h3>Nenhum usuário encontrado</h3>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+
+                container.innerHTML = `
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>E-mail</th>
+                                <th>Data de Cadastro</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${users.map(user => `
+                                <tr>
+                                    <td>${user.full_name || 'Não informado'}</td>
+                                    <td>${user.email}</td>
+                                    <td>${new Date(user.created_at).toLocaleDateString('pt-BR')}</td>
+                                    <td>
+                                        <span class="status-badge ${user.is_active ? 'active' : 'inactive'}">
+                                            ${user.is_active ? 'Ativo' : 'Inativo'}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-icon view" title="Visualizar">
+                                                <i data-lucide="eye"></i>
+                                            </button>
+                                            <button class="btn-icon edit" title="Editar">
+                                                <i data-lucide="edit"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+
+                lucide.createIcons();
+
+            } catch (error) {
+                console.error('Erro ao carregar usuários:', error);
+                document.getElementById('users-table-container').innerHTML = `
+                    <div class="empty-state">
+                        <h3>Erro ao carregar usuários</h3>
+                        <p>Tente novamente em alguns instantes.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Carregar dados de produtos
+        async function loadProductsData() {
+            try {
+                const container = document.getElementById('products-table-container');
+                container.innerHTML = `
+                    <div class="loading-state">
+                        <div class="loading-spinner"></div>
+                        <span>Carregando produtos...</span>
+                    </div>
+                `;
+
+                const { data: products, error } = await supabase
+                    .from('products')
+                    .select(`
+                        *,
+                        categories(name),
+                        affiliate_platforms(name)
+                    `)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                if (!products || products.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <i data-lucide="package"></i>
+                            </div>
+                            <h3>Nenhum produto encontrado</h3>
+                            <p>Adicione seu primeiro produto clicando no botão "Novo Produto".</p>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+
+                container.innerHTML = `
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Tipo</th>
+                                <th>Preço</th>
+                                <th>Status</th>
+                                <th>Vendas</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${products.map(product => `
+                                <tr>
+                                    <td>
+                                        <div>
+                                            <strong>${product.name}</strong>
+                                            ${product.categories ? `<br><small>${product.categories.name}</small>` : ''}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge ${product.type === 'own' ? 'active' : 'pending'}">
+                                            ${product.type === 'own' ? 'Próprio' : 'Afiliado'}
+                                        </span>
+                                        ${product.affiliate_platforms ? `<br><small>${product.affiliate_platforms.name}</small>` : ''}
+                                    </td>
+                                    <td>${formatCurrency(product.price)}</td>
+                                    <td>
+                                        <span class="status-badge ${product.status === 'published' ? 'active' : product.status === 'draft' ? 'pending' : 'inactive'}">
+                                            ${getStatusLabel(product.status)}
+                                        </span>
+                                    </td>
+                                    <td>${product.sales_count || 0}</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-icon view" title="Visualizar">
+                                                <i data-lucide="eye"></i>
+                                            </button>
+                                            <button class="btn-icon edit" title="Editar">
+                                                <i data-lucide="edit"></i>
+                                            </button>
+                                            <button class="btn-icon delete" title="Excluir">
+                                                <i data-lucide="trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+
+                lucide.createIcons();
+
+            } catch (error) {
+                console.error('Erro ao carregar produtos:', error);
+                document.getElementById('products-table-container').innerHTML = `
+                    <div class="empty-state">
+                        <h3>Erro ao carregar produtos</h3>
+                        <p>Tente novamente em alguns instantes.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Carregar dados de pedidos
+        async function loadOrdersData() {
+            try {
+                const container = document.getElementById('orders-table-container');
+                container.innerHTML = `
+                    <div class="loading-state">
+                        <div class="loading-spinner"></div>
+                        <span>Carregando pedidos...</span>
+                    </div>
+                `;
+
+                const { data: orders, error } = await supabase
+                    .from('orders')
+                    .select(`
+                        *,
+                        profiles(full_name, email)
+                    `)
+                    .order('created_at', { ascending: false })
+                    .limit(100);
+
+                if (error) throw error;
+
+                if (!orders || orders.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <i data-lucide="shopping-cart"></i>
+                            </div>
+                            <h3>Nenhum pedido encontrado</h3>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+
+                container.innerHTML = `
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Pedido</th>
+                                <th>Cliente</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Data</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${orders.map(order => `
+                                <tr>
+                                    <td>
+                                        <strong>${order.order_number}</strong>
+                                    </td>
+                                    <td>
+                                        ${order.profiles?.full_name || 'Cliente não encontrado'}
+                                        <br><small>${order.profiles?.email || ''}</small>
+                                    </td>
+                                    <td>${formatCurrency(order.total_amount)}</td>
+                                    <td>
+                                        <span class="status-badge ${getOrderStatusClass(order.status)}">
+                                            ${getOrderStatusLabel(order.status)}
+                                        </span>
+                                    </td>
+                                    <td>${new Date(order.created_at).toLocaleDateString('pt-BR')}</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-icon view" title="Visualizar">
+                                                <i data-lucide="eye"></i>
+                                            </button>
+                                            <button class="btn-icon edit" title="Editar">
+                                                <i data-lucide="edit"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+
+                lucide.createIcons();
+
+            } catch (error) {
+                console.error('Erro ao carregar pedidos:', error);
+                document.getElementById('orders-table-container').innerHTML = `
+                    <div class="empty-state">
+                        <h3>Erro ao carregar pedidos</h3>
+                        <p>Tente novamente em alguns instantes.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Carregar dados de afiliados
+        async function loadAffiliatesData() {
+            try {
+                const container = document.getElementById('affiliates-table-container');
+                container.innerHTML = `
+                    <div class="loading-state">
+                        <div class="loading-spinner"></div>
+                        <span>Carregando plataformas...</span>
+                    </div>
+                `;
+
+                const { data: platforms, error } = await supabase
+                    .from('affiliate_platforms')
+                    .select('*')
+                    .order('name', { ascending: true });
+
+                if (error) throw error;
+
+                container.innerHTML = `
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Plataforma</th>
+                                <th>Comissão (%)</th>
+                                <th>Status</th>
+                                <th>Produtos</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${platforms.map(platform => `
+                                <tr>
+                                    <td><strong>${platform.name}</strong></td>
+                                    <td>${platform.commission_rate}%</td>
+                                    <td>
+                                        <span class="status-badge ${platform.is_active ? 'active' : 'inactive'}">
+                                            ${platform.is_active ? 'Ativo' : 'Inativo'}
+                                        </span>
+                                    </td>
+                                    <td>0</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-icon edit" title="Editar">
+                                                <i data-lucide="edit"></i>
+                                            </button>
+                                            <button class="btn-icon delete" title="Excluir">
+                                                <i data-lucide="trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+
+                lucide.createIcons();
+
+            } catch (error) {
+                console.error('Erro ao carregar plataformas:', error);
+                document.getElementById('affiliates-table-container').innerHTML = `
+                    <div class="empty-state">
+                        <h3>Erro ao carregar plataformas</h3>
+                        <p>Tente novamente em alguns instantes.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Mostrar modal de produto
+        function showProductModal() {
+            document.getElementById('product-modal').classList.add('show');
+            loadAffiliatePlatforms();
+        }
+
+        // Esconder modal de produto
+        function hideProductModal() {
+            document.getElementById('product-modal').classList.remove('show');
+            document.getElementById('product-form').reset();
+        }
+
+        // Carregar plataformas de afiliados no select
+        async function loadAffiliatePlatforms() {
+            try {
+                const { data: platforms, error } = await supabase
+                    .from('affiliate_platforms')
+                    .select('id, name')
+                    .eq('is_active', true)
+                    .order('name');
+
+                if (error) throw error;
+
+                const select = document.getElementById('affiliate-platform');
+                select.innerHTML = '<option value="">Selecione...</option>';
+                
+                platforms.forEach(platform => {
+                    const option = document.createElement('option');
+                    option.value = platform.id;
+                    option.textContent = platform.name;
+                    select.appendChild(option);
+                });
+
+            } catch (error) {
+                console.error('Erro ao carregar plataformas:', error);
+            }
+        }
+
+        // Toggle campos de afiliado
+        function toggleAffiliateFields() {
+            const productType = document.getElementById('product-type').value;
+            const affiliateFields = document.getElementById('affiliate-fields');
+            const affiliateUrlField = document.getElementById('affiliate-url-field');
+            
+            if (productType === 'affiliate') {
+                affiliateFields.style.display = 'block';
+                affiliateUrlField.style.display = 'block';
+            } else {
+                affiliateFields.style.display = 'none';
+                affiliateUrlField.style.display = 'none';
+            }
+        }
+
+        // Processar formulário de produto
+        async function handleProductSubmit(e) {
+            e.preventDefault();
+            
+            try {
+                const formData = {
+                    name: document.getElementById('product-name').value,
+                    type: document.getElementById('product-type').value,
+                    price: parseFloat(document.getElementById('product-price').value),
+                    description: document.getElementById('product-description').value,
+                    status: 'draft',
+                    slug: generateSlug(document.getElementById('product-name').value)
+                };
+
+                if (formData.type === 'affiliate') {
+                    formData.affiliate_platform_id = document.getElementById('affiliate-platform').value;
+                    formData.affiliate_url = document.getElementById('affiliate-url').value;
+                }
+
+                const { data, error } = await supabase
+                    .from('products')
+                    .insert([formData]);
+
+                if (error) throw error;
+
+                hideProductModal();
+                loadProductsData();
+                alert('Produto adicionado com sucesso!');
+
+            } catch (error) {
+                console.error('Erro ao salvar produto:', error);
+                alert('Erro ao salvar produto. Tente novamente.');
+            }
+        }
+
+        // Gerar slug
+        function generateSlug(text) {
+            return text
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-')
+                .trim();
+        }
+
+        // Funções auxiliares
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value);
+        }
+
+        function getStatusLabel(status) {
+            const labels = {
+                'draft': 'Rascunho',
+                'published': 'Publicado',
+                'archived': 'Arquivado'
+            };
+            return labels[status] || status;
+        }
+
+        function getOrderStatusLabel(status) {
+            const labels = {
+                'pending': 'Pendente',
+                'processing': 'Processando',
+                'completed': 'Concluído',
+                'cancelled': 'Cancelado',
+                'refunded': 'Reembolsado'
+            };
+            return labels[status] || status;
+        }
+
+        function getOrderStatusClass(status) {
+            const classes = {
+                'pending': 'pending',
+                'processing': 'pending',
+                'completed': 'completed',
+                'cancelled': 'inactive',
+                'refunded': 'inactive'
+            };
+            return classes[status] || 'pending';
+        }
+
+        // Processar logout
+        async function handleLogout() {
+            try {
+                const { error } = await supabase.auth.signOut();
+                
+                if (error) throw error;
+                
+                window.location.href = '../index.html';
+                
+            } catch (error) {
+                console.error('Erro ao fazer logout:', error);
+                alert('Erro ao sair. Tente novamente.');
+            }
+        }
+    </script>
+</body>
+</html>
+

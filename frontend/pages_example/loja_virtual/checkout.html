@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - RE-EDUCA | Viva Saudável</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <!-- Fonte San Francisco (similar à usada no macOS) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sf-pro-display@1.0.0/index.css">
+    <!-- Ícones Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Stripe JS -->
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+    <!-- Menu de navegação principal -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="logo">
+                <img src="assets/images/LOGO_MARCA.png" alt="RE-EDUCA | Viva Saudável" class="logo-img">
+                <span class="logo-text">RE-EDUCA | Viva Saudável</span>
+            </div>
+            <ul class="nav-links">
+                <li class="nav-item">
+                    <a href="index.html">
+                        <i data-lucide="home"></i>
+                        <span>Início</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="index.html#produtos">
+                        <i data-lucide="book-open"></i>
+                        <span>E-books</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="index.html#ferramentas">
+                        <i data-lucide="tool"></i>
+                        <span>Ferramentas</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="index.html#sobre">
+                        <i data-lucide="info"></i>
+                        <span>Sobre</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="index.html#contato">
+                        <i data-lucide="mail"></i>
+                        <span>Contato</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="login.html">
+                        <i data-lucide="user"></i>
+                        <span>Entrar</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    <!-- Checkout -->
+    <div class="checkout-container">
+        <h1 class="text-center mb-4">Finalizar Compra</h1>
+        
+        <div class="checkout-grid">
+            <div class="checkout-form">
+                <div class="macos-window">
+                    <div class="window-header">
+                        <div class="window-controls">
+                            <span class="control close"></span>
+                            <span class="control minimize"></span>
+                            <span class="control maximize"></span>
+                        </div>
+                        <div class="window-title">Informações de Pagamento</div>
+                    </div>
+                    <div class="window-content">
+                        <div id="checkout-steps">
+                            <!-- Passo 1: Informações Pessoais -->
+                            <div id="step-1" class="checkout-step active">
+                                <h3 class="mb-3">Informações Pessoais</h3>
+                                
+                                <div class="form-group">
+                                    <label class="form-label" for="name">Nome Completo <span class="required">*</span></label>
+                                    <input type="text" id="name" class="form-input" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label" for="email">E-mail <span class="required">*</span></label>
+                                    <input type="email" id="email" class="form-input" required>
+                                    <span class="form-hint">Você receberá o e-book neste e-mail após a confirmação do pagamento.</span>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label" for="phone">Telefone</label>
+                                    <input type="tel" id="phone" class="form-input" placeholder="(00) 00000-0000">
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <a href="index.html" class="macos-button secondary">
+                                        <i data-lucide="arrow-left"></i>
+                                        <span>Voltar</span>
+                                    </a>
+                                    <button type="button" class="macos-button primary" onclick="nextStep(1)">
+                                        <span>Continuar</span>
+                                        <i data-lucide="arrow-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Passo 2: Pagamento -->
+                            <div id="step-2" class="checkout-step">
+                                <h3 class="mb-3">Pagamento</h3>
+                                
+                                <div class="form-group">
+                                    <div id="payment-element">
+                                        <!-- Stripe Elements será inserido aqui -->
+                                    </div>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="button" class="macos-button secondary" onclick="prevStep(2)">
+                                        <i data-lucide="arrow-left"></i>
+                                        <span>Voltar</span>
+                                    </button>
+                                    <button type="button" id="submit-button" class="macos-button primary">
+                                        <i data-lucide="credit-card"></i>
+                                        <span>Finalizar Pagamento</span>
+                                    </button>
+                                </div>
+                                
+                                <div id="payment-message" class="mt-3" style="display: none;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="checkout-summary">
+                <h3 class="mb-3">Resumo do Pedido</h3>
+                
+                <div id="product-details">
+                    <!-- Detalhes do produto serão inseridos aqui -->
+                </div>
+                
+                <div class="checkout-total">
+                    <span>Total:</span>
+                    <span id="total-price">R$ 0,00</span>
+                </div>
+                
+                <div class="mt-4">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                        <i data-lucide="shield-check" style="color: var(--primary-color);"></i>
+                        <span>Pagamento 100% seguro</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                        <i data-lucide="download" style="color: var(--primary-color);"></i>
+                        <span>Download imediato após pagamento</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i data-lucide="headphones" style="color: var(--primary-color);"></i>
+                        <span>Suporte disponível por e-mail</span>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <img src="https://stripe.com/img/v3/home/social-payments.png" alt="Métodos de Pagamento" style="width: 100%; border-radius: var(--border-radius);">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-column">
+                <div class="footer-logo">
+                    <img src="assets/images/LOGO_MARCA.png" alt="RE-EDUCA | Viva Saudável" class="logo-img">
+                    <span class="logo-text">RE-EDUCA</span>
+                </div>
+                <p>Transformando vidas através da educação alimentar e hábitos saudáveis.</p>
+                <div style="display: flex; gap: 15px; margin-top: 20px;">
+                    <a href="#" style="color: rgba(255, 255, 255, 0.8); font-size: 20px;"><i data-lucide="facebook"></i></a>
+                    <a href="#" style="color: rgba(255, 255, 255, 0.8); font-size: 20px;"><i data-lucide="instagram"></i></a>
+                    <a href="#" style="color: rgba(255, 255, 255, 0.8); font-size: 20px;"><i data-lucide="twitter"></i></a>
+                    <a href="#" style="color: rgba(255, 255, 255, 0.8); font-size: 20px;"><i data-lucide="youtube"></i></a>
+                </div>
+            </div>
+            
+            <div class="footer-column">
+                <h4>Links Rápidos</h4>
+                <ul>
+                    <li><a href="index.html">Início</a></li>
+                    <li><a href="index.html#produtos">E-books</a></li>
+                    <li><a href="index.html#ferramentas">Ferramentas</a></li>
+                    <li><a href="index.html#sobre">Sobre</a></li>
+                    <li><a href="index.html#contato">Contato</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h4>E-books</h4>
+                <ul>
+                    <li><a href="checkout.html?product=controlando-meu-peso">Controlando Meu Peso</a></li>
+                    <li><a href="#">Receitas Saudáveis</a></li>
+                    <li><a href="#">Guia de Exercícios</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h4>Contato</h4>
+                <ul>
+                    <li><a href="mailto:contato@reeduca-vivasaudavel.com">contato@reeduca-vivasaudavel.com</a></li>
+                    <li><a href="tel:+5511999999999">(11) 99999-9999</a></li>
+                    <li><a href="https://reeduca-vivasaudavel.wuaze.com" target="_blank">reeduca-vivasaudavel.wuaze.com</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2025 RE-EDUCA | Viva Saudável. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+    
+    <!-- Notificação de Erro -->
+    <div id="error-notification" class="notification error" style="display: none;">
+        <div class="notification-content">
+            <div class="notification-title">Erro</div>
+            <div id="error-message" class="notification-message">Ocorreu um erro. Por favor, tente novamente.</div>
+        </div>
+        <button class="notification-close" onclick="closeNotification('error-notification')"><i data-lucide="x"></i></button>
+    </div>
+
+    <script>
+        // Inicialização do Supabase
+        const supabaseUrl = 'https://xegxcgwasjuszskgpjll.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhlZ3hjZ3dhc2p1c3pza2dwamxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgwMjk4MDMsImV4cCI6MjA2MzYwNTgwM30.2edkluCirLNyqyYdonJoE6BxnR_kLGLYMutfb28096U';
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        
+        // Inicialização do Stripe
+        const stripe = Stripe('pk_live_51RS0hDEQkVLI4W08gQstnlF5ICqgD7NGCe1sMimUitNHt4de7vdd8luA9m5KMJGEh7bHSUByCWuF6Gy4Y0no8fBz00a0YCQmj1');
+        let elements;
+        
+        // Produtos disponíveis
+        const products = {
+            'controlando-meu-peso': {
+                id: 'prod_controlando_meu_peso',
+                name: 'Controlando Meu Peso',
+                description: 'Guia prático para quem quer perder, manter ou ganhar peso com equilíbrio.',
+                price: 19.90,
+                image: 'assets/images/LOGO_MARCA.png'
+            }
+        };
+        
+        // Produto atual
+        let currentProduct = null;
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inicializar ícones
+            lucide.createIcons();
+            
+            // Obter produto da URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('product');
+            
+            if (productId && products[productId]) {
+                currentProduct = products[productId];
+                displayProductDetails(currentProduct);
+            } else {
+                // Produto não encontrado, redirecionar para a página inicial
+                window.location.href = 'index.html';
+            }
+            
+            // Verificar autenticação
+            checkAuth();
+        });
+        
+        // Verificar se o usuário está autenticado
+        async function checkAuth() {
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            if (session) {
+                // Usuário autenticado, preencher campos
+                document.getElementById('email').value = session.user.email;
+                document.getElementById('email').disabled = true;
+                
+                // Atualizar menu
+                updateAuthMenu(session.user);
+            }
+        }
+        
+        // Atualizar menu de autenticação
+        function updateAuthMenu(user) {
+            const navLinks = document.querySelector('.nav-links');
+            const lastItem = navLinks.lastElementChild;
+            
+            // Remover o último item (Entrar)
+            navLinks.removeChild(lastItem);
+            
+            // Adicionar novo item (Dashboard)
+            const dashboardItem = document.createElement('li');
+            dashboardItem.className = 'nav-item';
+            dashboardItem.innerHTML = `
+                <a href="cliente-dashboard.html">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Minha Conta</span>
+                </a>
+            `;
+            
+            navLinks.appendChild(dashboardItem);
+            
+            // Recriar ícones
+            lucide.createIcons();
+        }
+        
+        // Exibir detalhes do produto
+        function displayProductDetails(product) {
+            const productDetailsElement = document.getElementById('product-details');
+            const totalPriceElement = document.getElementById('total-price');
+            
+            // Atualizar detalhes do produto
+            productDetailsElement.innerHTML = `
+                <div class="checkout-product">
+                    <div class="checkout-product-image">
+                        <img src="${product.image}" alt="${product.name}">
+                    </div>
+                    <div class="checkout-product-details">
+                        <div class="checkout-product-title">${product.name}</div>
+                        <div class="checkout-product-price">R$ ${product.price.toFixed(2)}</div>
+                    </div>
+                </div>
+            `;
+            
+            // Atualizar preço total
+            totalPriceElement.textContent = `R$ ${product.price.toFixed(2)}`;
+        }
+        
+        // Avançar para o próximo passo
+        function nextStep(currentStepNumber) {
+            // Validar campos do passo atual
+            if (currentStepNumber === 1) {
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                
+                if (!name || !email) {
+                    showError('Por favor, preencha todos os campos obrigatórios.');
+                    return;
+                }
+                
+                if (!validateEmail(email)) {
+                    showError('Por favor, insira um e-mail válido.');
+                    return;
+                }
+                
+                // Inicializar Stripe Elements
+                initializeStripe(name, email);
+            }
+            
+            // Esconder passo atual
+            document.getElementById(`step-${currentStepNumber}`).classList.remove('active');
+            
+            // Mostrar próximo passo
+            document.getElementById(`step-${currentStepNumber + 1}`).classList.add('active');
+        }
+        
+        // Voltar para o passo anterior
+        function prevStep(currentStepNumber) {
+            // Esconder passo atual
+            document.getElementById(`step-${currentStepNumber}`).classList.remove('active');
+            
+            // Mostrar passo anterior
+            document.getElementById(`step-${currentStepNumber - 1}`).classList.add('active');
+        }
+        
+        // Inicializar Stripe Elements
+        async function initializeStripe(name, email) {
+            try {
+                // Criar sessão de checkout no servidor
+                const response = await fetch('https://reeduca-vivasaudavel.wuaze.com/create-checkout-session.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        product_id: currentProduct.id,
+                        product_name: currentProduct.name,
+                        price: currentProduct.price,
+                        customer_name: name,
+                        customer_email: email,
+                        customer_phone: document.getElementById('phone').value || ''
+                    }),
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erro ao criar sessão de checkout');
+                }
+                
+                const data = await response.json();
+                
+                // Configurar Stripe Elements
+                const appearance = {
+                    theme: 'stripe',
+                    variables: {
+                        colorPrimary: '#4CAF50',
+                        colorBackground: '#FFFFFF',
+                        colorText: '#333333',
+                        colorDanger: '#F44336',
+                        fontFamily: 'SF Pro Display, -apple-system, BlinkMacSystemFont, sans-serif',
+                        borderRadius: '10px',
+                        spacingUnit: '4px'
+                    }
+                };
+                
+                elements = stripe.elements({
+                    clientSecret: data.clientSecret,
+                    appearance
+                });
+                
+                // Criar elemento de pagamento
+                const paymentElement = elements.create('payment');
+                paymentElement.mount('#payment-element');
+                
+                // Configurar botão de envio
+                document.getElementById('submit-button').addEventListener('click', handleSubmit);
+                
+            } catch (error) {
+                console.error('Erro:', error);
+                showError('Erro ao inicializar o pagamento. Por favor, tente novamente.');
+            }
+        }
+        
+        // Lidar com envio do formulário
+        async function handleSubmit(e) {
+            e.preventDefault();
+            
+            // Desabilitar botão durante o processamento
+            const submitButton = document.getElementById('submit-button');
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i data-lucide="loader"></i><span>Processando...</span>';
+            lucide.createIcons();
+            
+            const messageContainer = document.getElementById('payment-message');
+            messageContainer.style.display = 'none';
+            
+            try {
+                // Confirmar pagamento
+                const { error } = await stripe.confirmPayment({
+                    elements,
+                    confirmParams: {
+                        return_url: `https://reeduca-vivasaudavel.wuaze.com/success.html?product=${encodeURIComponent(currentProduct.id)}`
+                    }
+                });
+                
+                if (error) {
+                    // Exibir mensagem de erro
+                    messageContainer.textContent = error.message;
+                    messageContainer.style.display = 'block';
+                    messageContainer.style.color = 'var(--error-color)';
+                    
+                    // Reativar botão
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = '<i data-lucide="credit-card"></i><span>Finalizar Pagamento</span>';
+                    lucide.createIcons();
+                }
+                
+            } catch (error) {
+                console.error('Erro:', error);
+                
+                // Exibir mensagem de erro
+                messageContainer.textContent = 'Ocorreu um erro inesperado. Por favor, tente novamente.';
+                messageContainer.style.display = 'block';
+                messageContainer.style.color = 'var(--error-color)';
+                
+                // Reativar botão
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i data-lucide="credit-card"></i><span>Finalizar Pagamento</span>';
+                lucide.createIcons();
+            }
+        }
+        
+        // Validar e-mail
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+        
+        // Mostrar erro
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+            showNotification('error-notification');
+        }
+        
+        // Mostrar notificação
+        function showNotification(notificationId) {
+            const notification = document.getElementById(notificationId);
+            notification.style.display = 'flex';
+            
+            // Fechar automaticamente após 5 segundos
+            setTimeout(() => {
+                closeNotification(notificationId);
+            }, 5000);
+        }
+        
+        // Fechar notificação
+        function closeNotification(notificationId) {
+            const notification = document.getElementById(notificationId);
+            notification.classList.add('slide-out');
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+                notification.classList.remove('slide-out');
+            }, 300);
+        }
+    </script>
+</body>
+</html>
