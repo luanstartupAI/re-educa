@@ -1,0 +1,62 @@
+# Backend RE-EDUCA Store v2.0.0 - Dependências
+
+# Framework principal
+Flask==3.0.0
+Flask-CORS==4.0.0
+
+# Banco de dados e ORM
+supabase==2.3.0
+SQLAlchemy==2.0.25
+
+# Autenticação e segurança
+PyJWT==2.8.0
+bcrypt==4.1.2
+cryptography==41.0.8
+
+# APIs externas e HTTP
+requests==2.31.0
+urllib3==2.1.0
+
+# Processamento de dados
+pandas==2.1.4
+numpy==1.26.2
+
+# Validação e serialização
+marshmallow==3.20.2
+email-validator==2.1.0
+
+# Logging e monitoramento
+python-dotenv==1.0.0
+
+# Utilitários
+python-dateutil==2.8.2
+pytz==2023.3
+
+# Desenvolvimento e testes
+pytest==7.4.3
+pytest-flask==1.3.0
+pytest-cov==4.1.0
+
+# Produção
+gunicorn==21.2.0
+redis==5.0.1
+
+# Análise de dados e ML (para futuras funcionalidades de IA)
+scikit-learn==1.3.2
+scipy==1.11.4
+
+# Processamento de imagens (para futuras funcionalidades AR)
+Pillow==10.1.0
+
+# Cache e performance
+Flask-Caching==2.1.0
+
+# Rate limiting
+Flask-Limiter==3.5.0
+
+# Documentação da API
+flask-restx==1.3.0
+
+# Monitoramento de saúde
+psutil==5.9.6
+

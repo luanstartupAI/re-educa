@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categorias - RE-EDUCA | Viva Saudável</title>
+    <meta name="description" content="Explore nossas categorias de produtos digitais sobre saúde, nutrição e bem-estar.">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../src/styles/main.css">
+    
+    <!-- Ícones Lucide -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <!-- Navegação -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../index.html" class="navbar-brand">
+                <img src="../assets/images/LOGO_MARCA.png" alt="RE-EDUCA Logo">
+                <span>RE-EDUCA</span>
+            </a>
+            
+            <ul class="navbar-nav">
+                <li>
+                    <a href="../index.html">
+                        <i data-lucide="home"></i>
+                        <span>Início</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="categorias.html" class="active">
+                        <i data-lucide="grid-3x3"></i>
+                        <span>Categorias</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="../index.html#ferramentas">
+                        <i data-lucide="calculator"></i>
+                        <span>Ferramentas</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="../index.html#sobre">
+                        <i data-lucide="info"></i>
+                        <span>Sobre</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="../index.html#contato">
+                        <i data-lucide="mail"></i>
+                        <span>Contato</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="../login.html">
+                        <i data-lucide="user"></i>
+                        <span>Entrar</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Header da Página -->
+    <section class="section-sm bg-gray-50">
+        <div class="container">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold mb-4">Categorias de Produtos</h1>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    Explore nossos produtos organizados por categoria para encontrar exatamente o que você precisa para sua jornada de saúde e bem-estar.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filtros -->
+    <section class="section-sm">
+        <div class="container">
+            <div class="flex flex-wrap gap-4 justify-center mb-8">
+                <button class="btn btn-primary category-filter active" data-category="all">
+                    <i data-lucide="grid-3x3"></i>
+                    <span>Todas as Categorias</span>
+                </button>
+                <button class="btn btn-outline category-filter" data-category="ebooks">
+                    <i data-lucide="book-open"></i>
+                    <span>E-books</span>
+                </button>
+                <button class="btn btn-outline category-filter" data-category="cursos">
+                    <i data-lucide="play-circle"></i>
+                    <span>Cursos</span>
+                </button>
+                <button class="btn btn-outline category-filter" data-category="ferramentas">
+                    <i data-lucide="calculator"></i>
+                    <span>Ferramentas</span>
+                </button>
+                <button class="btn btn-outline category-filter" data-category="receitas">
+                    <i data-lucide="chef-hat"></i>
+                    <span>Receitas</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categorias -->
+    <section class="section">
+        <div class="container">
+            <!-- E-books -->
+            <div class="category-section" data-category="ebooks">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="bg-primary text-white p-4 rounded-xl">
+                        <i data-lucide="book-open" size="32"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold mb-2">E-books de Saúde e Nutrição</h2>
+                        <p class="text-gray-600">Guias completos e práticos para transformar sua alimentação e estilo de vida</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-3 mb-16">
+                    <div class="product-card">
+                        <img src="../assets/images/LOGO_MARCA.png" alt="Controlando Meu Peso" class="product-card-image">
+                        <div class="product-card-content">
+                            <div class="badge badge-success mb-3">Mais Vendido</div>
+                            <h3 class="product-card-title">Controlando Meu Peso</h3>
+                            <p class="product-card-description">
+                                Guia prático para quem quer perder, manter ou ganhar peso com equilíbrio. Estratégias simples para o dia a dia.
+                            </p>
+                            <div class="product-card-price">R$ 19,90</div>
+                            <a href="checkout.html?product=controlando-meu-peso" class="btn btn-primary btn-full">
+                                <i data-lucide="shopping-cart"></i>
+                                <span>Comprar Agora</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="product-card">
+                        <img src="../assets/images/LOGO_MARCA.png" alt="Alimentação Saudável" class="product-card-image">
+                        <div class="product-card-content">
+                            <h3 class="product-card-title">Alimentação Saudável</h3>
+                            <p class="product-card-description">
+                                Fundamentos de uma alimentação equilibrada e nutritiva. Aprenda a fazer escolhas conscientes.
+                            </p>
+                            <div class="product-card-price">R$ 24,90</div>
+                            <a href="checkout.html?product=alimentacao-saudavel" class="btn btn-primary btn-full">
+                                <i data-lucide="shopping-cart"></i>
+                                <span>Comprar Agora</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="product-card">
+                        <img src="../assets/images/LOGO_MARCA.png" alt="Detox Natural" class="product-card-image">
+                        <div class="product-card-content">
+                            <div class="badge badge-info mb-3">Novo</div>
+                            <h3 class="product-card-title">Detox Natural</h3>
+                            <p class="product-card-description">
+                                Programa completo de desintoxicação natural para renovar seu corpo e mente.
+                            </p>
+                            <div class="product-card-price">R$ 27,90</div>
+                            <a href="checkout.html?product=detox-natural" class="btn btn-primary btn-full">
+                                <i data-lucide="shopping-cart"></i>
+                                <span>Comprar Agora</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cursos -->
+            <div class="category-section" data-category="cursos">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="bg-secondary text-white p-4 rounded-xl">
+                        <i data-lucide="play-circle" size="32"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold mb-2">Cursos Online</h2>
+                        <p class="text-gray-600">Aprenda com especialistas através de videoaulas e conteúdo interativo</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 mb-16">
+                    <div class="product-card">
+                        <img src="../assets/images/LOGO_MARCA.png" alt="Curso de Nutrição" class="product-card-image">
+                        <div class="product-card-content">
+                            <div class="badge badge-warning mb-3">Em Breve</div>
+                            <h3 class="product-card-title">Fundamentos da Nutrição</h3>
+                            <p class="product-card-description">
+                                Curso completo sobre os princípios da nutrição e como aplicá-los no dia a dia.
+                            </p>
+                            <div class="product-card-price">R$ 97,00</div>
+                            <button class="btn btn-outline btn-full" disabled>
+                                <i data-lucide="clock"></i>
+                                <span>Em Breve</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="product-card">
+                        <img src="../assets/images/LOGO_MARCA.png" alt="Curso de Culinária" class="product-card-image">
+                        <div class="product-card-content">
+                            <div class="badge badge-warning mb-3">Em Breve</div>
+                            <h3 class="product-card-title">Culinária Saudável</h3>
+                            <p class="product-card-description">
+                                Aprenda técnicas culinárias para preparar refeições nutritivas e saborosas.
+                            </p>
+                            <div class="product-card-price">R$ 127,00</div>
+                            <button class="btn btn-outline btn-full" disabled>
+                                <i data-lucide="clock"></i>
+                                <span>Em Breve</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Receitas -->
+            <div class="category-section" data-category="receitas">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="bg-accent text-white p-4 rounded-xl">
+                        <i data-lucide="chef-hat" size="32"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold mb-2">Livros de Receitas</h2>
+                        <p class="text-gray-600">Coleções de receitas saudáveis e práticas para o seu dia a dia</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-3 mb-16">
+                    <div class="product-card">
+                        <img src="../assets/images/LOGO_MARCA.png" alt="Receitas Nutritivas" class="product-card-image">
+                        <div class="product-card-content">
+                            <h3 class="product-card-title">50 Receitas Nutritivas</h3>
+                            <p class="product-card-description">
+                                Receitas saudáveis e saborosas para toda a família. Pratos práticos e nutritivos.
+                            </p>
+                            <div class="product-card-price">R$ 29,90</div>
+                            <a href="checkout.html?product=receitas-nutritivas" class="btn btn-primary btn-full">
+                                <i data-lucide="shopping-cart"></i>
+                                <span>Comprar Agora</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="product-card">
+                        <img src="../assets/images/LOGO_MARCA.png" alt="Receitas Low Carb" class="product-card-image">
+                        <div class="product-card-content">
+                            <h3 class="product-card-title">Receitas Low Carb</h3>
+                            <p class="product-card-description">
+                                Deliciosas receitas com baixo teor de carboidratos para uma alimentação equilibrada.
+                            </p>
+                            <div class="product-card-price">R$ 32,90</div>
+                            <a href="checkout.html?product=receitas-low-carb" class="btn btn-primary btn-full">
+                                <i data-lucide="shopping-cart"></i>
+                                <span>Comprar Agora</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="product-card">
+                        <img src="../assets/images/LOGO_MARCA.png" alt="Receitas Veganas" class="product-card-image">
+                        <div class="product-card-content">
+                            <h3 class="product-card-title">Receitas Veganas</h3>
+                            <p class="product-card-description">
+                                Pratos 100% vegetais, nutritivos e cheios de sabor para uma alimentação consciente.
+                            </p>
+                            <div class="product-card-price">R$ 34,90</div>
+                            <a href="checkout.html?product=receitas-veganas" class="btn btn-primary btn-full">
+                                <i data-lucide="shopping-cart"></i>
+                                <span>Comprar Agora</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ferramentas -->
+            <div class="category-section" data-category="ferramentas">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="bg-info text-white p-4 rounded-xl">
+                        <i data-lucide="calculator" size="32"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold mb-2">Ferramentas Gratuitas</h2>
+                        <p class="text-gray-600">Calculadoras e ferramentas para monitorar sua saúde</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-3 mb-16">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="flex items-center gap-4">
+                                <div class="bg-primary text-white p-3 rounded-xl">
+                                    <i data-lucide="activity"></i>
+                                </div>
+                                <div>
+                                    <h3 class="card-title mb-0">Calculadora de IMC</h3>
+                                    <p class="card-description">Gratuita</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p>Calcule seu Índice de Massa Corporal e descubra se está na faixa ideal.</p>
+                        </div>
+                        <div class="card-footer">
+                            <a href="../tools/calculadora-imc.html" class="btn btn-primary btn-full">
+                                <i data-lucide="calculator"></i>
+                                <span>Usar Agora</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="flex items-center gap-4">
+                                <div class="bg-secondary text-white p-3 rounded-xl">
+                                    <i data-lucide="scale"></i>
+                                </div>
+                                <div>
+                                    <h3 class="card-title mb-0">Balança de Alimentos</h3>
+                                    <p class="card-description">Gratuita</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p>Monitore a qualidade nutricional dos seus alimentos.</p>
+                        </div>
+                        <div class="card-footer">
+                            <a href="../tools/balanca-alimentos.html" class="btn btn-primary btn-full">
+                                <i data-lucide="scale"></i>
+                                <span>Usar Agora</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="flex items-center gap-4">
+                                <div class="bg-accent text-white p-3 rounded-xl">
+                                    <i data-lucide="calendar"></i>
+                                </div>
+                                <div>
+                                    <h3 class="card-title mb-0">Calendário Alimentar</h3>
+                                    <p class="card-description">Gratuita</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p>Organize seu cardápio semanal de forma inteligente.</p>
+                        </div>
+                        <div class="card-footer">
+                            <a href="../tools/calendario-alimentar.html" class="btn btn-primary btn-full">
+                                <i data-lucide="calendar"></i>
+                                <span>Usar Agora</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="section bg-primary text-white">
+        <div class="container text-center">
+            <h2 class="text-3xl font-bold mb-4">Não encontrou o que procurava?</h2>
+            <p class="text-lg mb-8 opacity-90">
+                Entre em contato conosco e sugira novos produtos. Estamos sempre criando conteúdo baseado nas necessidades dos nossos clientes.
+            </p>
+            <a href="../index.html#contato" class="btn btn-secondary btn-lg">
+                <i data-lucide="mail"></i>
+                <span>Entrar em Contato</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container">
+            <div class="grid grid-cols-4 gap-8">
+                <div class="col-span-2">
+                    <div class="flex items-center gap-3 mb-4">
+                        <img src="../assets/images/LOGO_MARCA.png" alt="RE-EDUCA" style="height: 40px;">
+                        <span class="text-xl font-bold">RE-EDUCA | Viva Saudável</span>
+                    </div>
+                    <p class="text-gray-400 mb-4">
+                        Transformando vidas através da educação alimentar e hábitos saudáveis.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Categorias</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">E-books</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Cursos</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Receitas</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Ferramentas</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Suporte</h4>
+                    <ul class="space-y-2">
+                        <li><a href="../index.html#contato" class="text-gray-400 hover:text-white">Contato</a></li>
+                        <li><a href="../login.html" class="text-gray-400 hover:text-white">Área do Cliente</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 RE-EDUCA | Viva Saudável. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Inicializar ícones Lucide
+        lucide.createIcons();
+
+        // Sistema de filtros
+        const filterButtons = document.querySelectorAll('.category-filter');
+        const categorySections = document.querySelectorAll('.category-section');
+
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const category = button.dataset.category;
+                
+                // Atualizar botões ativos
+                filterButtons.forEach(btn => {
+                    btn.classList.remove('btn-primary', 'active');
+                    btn.classList.add('btn-outline');
+                });
+                button.classList.remove('btn-outline');
+                button.classList.add('btn-primary', 'active');
+                
+                // Mostrar/ocultar seções
+                categorySections.forEach(section => {
+                    if (category === 'all' || section.dataset.category === category) {
+                        section.style.display = 'block';
+                        section.classList.add('fade-in');
+                    } else {
+                        section.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Animações ao scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.product-card, .card').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
+
